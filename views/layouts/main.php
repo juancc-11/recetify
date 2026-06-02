@@ -89,36 +89,27 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
 
     <?php if (!in_array(Yii::$app->controller->action->id, ['index', 'login', 'register', 'admin-login'])): ?>
         <form
-            action="<?= Yii::getAlias('@web/index.php') ?>"
-            method="GET"
-            class="rl-nav-search"
-        >
+    action="<?= yii\helpers\Url::to(['/recipe/search']) ?>"
+    method="GET"
+    class="rl-nav-search"
+>
 
-            <!-- RUTA -->
-            <input
-                type="hidden"
-                name="r"
-                value="recipe/search"
-            >
+    <input
+        type="text"
+        name="q"
+        class="rl-search-input"
+        placeholder="Buscar recetas..."
+        value="<?= Html::encode(Yii::$app->request->get('q', '')) ?>"
+    >
 
-            <!-- BUSCADOR -->
-            <input
-                type="text"
-                name="q"
-                class="rl-search-input"
-                placeholder="Buscar recetas..."
-                value="<?= Html::encode(Yii::$app->request->get('q', '')) ?>"
-            >
+    <button
+        type="submit"
+        class="rl-search-btn"
+    >
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
 
-            <!-- BOTÓN -->
-            <button
-                type="submit"
-                class="rl-search-btn"
-            >
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-
-        </form>
+</form>
     <?php endif; ?>
 
     <div class="rl-nav-right">
@@ -221,9 +212,12 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
         <a href="#" class="rl-sidebar-item">
             <i class="fa-solid fa-bookmark"></i> Guardado
         </a>
-        <a href="<?= Yii::$app->urlManager->createUrl(['site/mis-recetas']) ?>" class="rl-sidebar-item">
-            <i class="fa-solid fa-utensils"></i> Mis recetas
-        </a>
+        <a
+    href="<?= Yii::$app->urlManager->createUrl(['recipe/search']) ?>"
+    class="rl-sidebar-item"
+>
+    <i class="fa-solid fa-magnifying-glass"></i> Buscar recetas
+</a>
     </div>
 
     <div class="rl-sidebar-divider"></div>
