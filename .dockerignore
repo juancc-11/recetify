@@ -1,0 +1,10 @@
+vendor/
+runtime/
+web/assets/
+tests/
+.git
+.gitignore
+docker-compose.yml
+Dockerfile
+.dockerignore
+.env

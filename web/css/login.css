@@ -1,0 +1,224 @@
+/* CONTENEDOR */
+.lg-container {
+    display: flex;
+    justify-content: center;
+    padding: 60px 20px;
+    min-height: calc(100vh - 120px);
+}
+
+/* CAJA */
+.lg-box {
+    background-color: #3b4147;
+    color: white;
+    padding: 50px;
+    border-radius: 20px;
+    width: 500px;
+    max-width: 95%;
+    text-align: center;
+    align-self: flex-start;
+}
+
+/* HEADER */
+.lg-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.lg-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+/* TÍTULOS */
+.lg-title {
+    font-weight: 300;
+    margin: 0;
+    font-size: 28px;
+}
+
+.lg-subtitle {
+    font-weight: 300;
+    margin: 20px 0;
+}
+
+/* INPUTS */
+.lg-form-group {
+    text-align: left;
+    margin: 15px 0;
+}
+
+.lg-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    background: #d9d9d9;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.lg-input:focus {
+    outline: 2px solid #FD7E14;
+}
+
+/* ERROR */
+.lg-error {
+    margin-top: 10px;
+    color: #ff6b6b;
+    font-size: 14px;
+}
+
+/* LINK REGISTRO */
+.lg-register-link {
+    margin: 15px 0;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.lg-register-link a {
+    color: #FD7E14;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.lg-register-link a:hover {
+    text-decoration: underline;
+}
+
+/* BOTONES */
+.lg-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+}
+
+.lg-btn-outline {
+    background: #d9d9d9;
+    border: 2px solid #FD7E14;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #343A40;
+    font-size: 14px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.lg-btn-outline:hover {
+    background: #FD7E14;
+    color: white;
+}
+
+.lg-btn-filled {
+    background: #FD7E14;
+    border: none;
+    padding: 10px 20px;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.lg-btn-filled:hover {
+    background: #e06a00;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+
+/* Tablet */
+@media (max-width: 992px) {
+    .lg-container {
+        padding: 40px 20px;
+    }
+
+    .lg-box {
+        padding: 40px 36px;
+        width: 440px;
+    }
+
+    .lg-title {
+        font-size: 24px;
+    }
+}
+
+/* Celular */
+@media (max-width: 768px) {
+    .lg-container {
+        padding: 24px 14px;
+        align-items: flex-start;
+    }
+
+    .lg-box {
+        width: 100%;
+        max-width: 100%;
+        padding: 30px 20px;
+        border-radius: 14px;
+        box-sizing: border-box;
+    }
+
+    .lg-header {
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .lg-logo {
+        width: 48px;
+        height: 48px;
+    }
+
+    .lg-title {
+        font-size: 22px;
+    }
+
+    .lg-subtitle {
+        font-size: 14px;
+        margin: 14px 0;
+    }
+
+    .lg-input {
+        padding: 11px;
+        font-size: 16px; /* evita zoom automático en iOS */
+    }
+
+    /* Botones apilados en celular */
+    .lg-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .lg-btn-outline,
+    .lg-btn-filled {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 15px;
+        text-align: center;
+    }
+
+    .lg-register-link {
+        font-size: 13px;
+    }
+}
+
+/* Celular muy pequeño */
+@media (max-width: 380px) {
+    .lg-box {
+        padding: 24px 14px;
+    }
+
+    .lg-title {
+        font-size: 20px;
+    }
+
+    .lg-logo {
+        width: 38px;
+        height: 38px;
+    }
+}

@@ -1,0 +1,422 @@
+body {
+    margin: 0;
+    background: #cfcfcf;
+    font-family: Arial, sans-serif;
+}
+
+.admin-container {
+    display: flex;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 220px;
+    padding: 20px;
+}
+
+.sidebar .tab {
+    display: block;
+    padding: 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: black;
+    border: 2px solid #ff7a00;
+    margin-bottom: 10px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.sidebar .tab:hover {
+    background-color: #f5f5f5;
+}
+
+.sidebar .tab.active {
+    background: linear-gradient(135deg, #ff7a00, #ff9a2f);
+    color: white;
+}
+
+/* ===== CONTENT ===== */
+.content {
+    flex: 1;
+    background: #bfbfbf;
+    padding: 20px;
+}
+
+/* ===== FILTROS ===== */
+.top-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#filter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+#filter:focus {
+    border-color: #ff6a00;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+}
+
+#filter option {
+    padding: 10px;
+    background: #fff;
+    color: #333;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.search-box-input {
+    padding: 0 14px;
+    height: 40px;
+    width: 250px;
+    border: 1px solid #ccc;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    outline: none;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.btn-search {
+    height: 40px;
+    width: 45px;
+    border: none;
+    background-color: #ff7a00;
+    color: white;
+    cursor: pointer;
+    border-radius: 0 8px 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s ease;
+}
+
+/* ===== GRID ===== */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+/* ===== CARD GENERAL ===== */
+.card {
+    background: #e6e6e6;
+    padding: 15px;
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* ===== CLOSE BUTTON ===== */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border-radius: 15px;
+    border-color: #ff7a00;
+    color: #ff7a00;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: white;
+    background-color: #ff7a00;
+}
+
+/* ===== USER ===== */
+.user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    background: #ccc;
+    border-radius: 6px;
+    border: 2px solid #ff7a00;
+    background-size: cover;
+    background-position: center;
+}
+
+/* ===== RECETAS ===== */
+.image {
+    width: 100%;
+    height: 200px;
+    background: #999;
+    border-radius: 6px;
+    background-size: cover;
+    background-position: center;
+}
+
+.info h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff6a00;
+}
+
+/* ===== ACTIONS ===== */
+.actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ===== BOTONES ===== */
+.kick,
+.leer {
+    background: #fffdfb;
+    border: solid 2px;
+    border-color: #ff7a00;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.kick:hover,
+.leer:hover {
+    background: #ff7a00;
+}
+
+.ban,
+.estado {
+    background: #fffdfb;
+    border: solid 2px;
+    border-color: #ff7a00;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.ban:hover,
+.estado:hover {
+    background: #ff7a00;
+}
+
+.motivo {
+    font-size: 14px;
+    color: #ff7a00;
+    font-weight: bold;
+}
+
+.descripcion {
+    font-size: 12px;
+    color: #555;
+}
+
+.badge {
+    background: red;
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.btn-ban-toggle {
+    background: #fff;
+    border: 2px solid #28a745;
+    color: #28a745;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-ban-toggle:hover {
+    background: #28a745;
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #888;
+    font-size: 18px;
+}
+
+.empty-state i {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+
+/* Tablet */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 180px;
+        padding: 16px 12px;
+    }
+
+    .sidebar .tab {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .content {
+        padding: 16px;
+    }
+
+    /* Grid de 3 a 2 columnas */
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .search-box-input {
+        width: 180px;
+    }
+
+    .top-filters {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+}
+
+/* Celular */
+@media (max-width: 768px) {
+
+    /* Sidebar se convierte en barra horizontal arriba */
+    .admin-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 10px 14px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        box-sizing: border-box;
+    }
+
+    .sidebar .tab {
+        flex: 1 1 auto;
+        min-width: 120px;
+        text-align: center;
+        padding: 9px 10px;
+        font-size: 13px;
+        margin-bottom: 0;
+    }
+
+    .content {
+        padding: 14px;
+    }
+
+    /* Filtros apilados */
+    .top-filters {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .search-box-input {
+        width: 200px;
+        font-size: 16px; /* evita zoom en iOS */
+    }
+
+    #filter {
+        width: 100%;
+        font-size: 15px;
+    }
+
+    /* Grid de 1 columna */
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .image {
+        height: 160px;
+    }
+
+    .actions {
+        gap: 8px;
+    }
+
+    .kick,
+    .leer,
+    .ban,
+    .estado,
+    .btn-ban-toggle {
+        padding: 8px 12px;
+        font-size: 13px;
+        flex: 1 1 auto;
+        text-align: center;
+    }
+
+    .empty-state {
+        padding: 30px 20px;
+        font-size: 15px;
+    }
+
+    .empty-state i {
+        font-size: 32px;
+    }
+}
+
+/* Celular muy pequeño */
+@media (max-width: 380px) {
+    .sidebar .tab {
+        min-width: 100px;
+        font-size: 12px;
+        padding: 8px 6px;
+    }
+
+    .search-box-input {
+        width: 150px;
+    }
+
+    .card {
+        padding: 12px;
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .image {
+        height: 130px;
+    }
+
+    .kick,
+    .leer,
+    .ban,
+    .estado,
+    .btn-ban-toggle {
+        font-size: 12px;
+        padding: 7px 10px;
+    }
+}

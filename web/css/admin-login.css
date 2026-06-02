@@ -1,0 +1,250 @@
+body {
+    margin: 0;
+    background: #ffffff;
+    font-family: Arial, sans-serif;
+}
+
+/* Contenedor */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 50px);
+}
+
+/* Card */
+.login-card {
+    background: #3f454c;
+    padding: 40px;
+    border-radius: 12px;
+    width: 500px;
+    text-align: -webkit-center;
+    color: white;
+}
+
+/* Logo */
+.logo img {
+    width: 50px;
+    margin-bottom: 10px;
+}
+
+.logo h2 {
+    margin: 5px 0;
+    font-weight: normal;
+}
+
+.logo h3 {
+    margin-bottom: 20px;
+    font-weight: normal;
+}
+
+/* Inputs */
+.field {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.input {
+    width: 100%;
+    height: 35px;
+    border-radius: 5px;
+    border: none;
+    background: #dcdcdc;
+    padding: 5px;
+}
+
+/* Botones */
+.buttons {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn {
+    padding: 10px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-cancel {
+    background: white;
+    border: 2px solid #ff7a00;
+    color: black;
+}
+
+.btn-login {
+    background: #ff7a00;
+    border: none;
+    color: white;
+}
+
+/* Forzar estilos sobre Bootstrap */
+.login-card input {
+    width: 100% !important;
+    height: 35px !important;
+    border-radius: 5px !important;
+    border: none !important;
+    background: #dcdcdc !important;
+    padding: 5px !important;
+}
+
+.login-card .btn {
+    padding: 10px 25px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+}
+
+.login-card .btn-cancel {
+    background: white !important;
+    border: 2px solid #ff7a00 !important;
+    color: black !important;
+}
+
+.login-card .btn-login {
+    background: #ff7a00 !important;
+    border: none !important;
+    color: white !important;
+}
+
+/* Link registro */
+.lg-register-link {
+    margin: 15px 0;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.lg-register-link a {
+    color: #FD7E14;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+
+/* Tablet */
+@media (max-width: 992px) {
+    .login-card {
+        width: 420px;
+        padding: 36px 32px;
+    }
+
+    .logo h2 {
+        font-size: 20px;
+    }
+
+    .logo h3 {
+        font-size: 16px;
+    }
+
+    .field label {
+        font-size: 16px;
+    }
+}
+
+/* Celular */
+@media (max-width: 768px) {
+    .login-container {
+        align-items: flex-start;
+        padding: 24px 14px;
+        height: auto;
+        min-height: calc(100vh - 50px);
+        box-sizing: border-box;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 100%;
+        padding: 28px 20px;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+
+    .logo img {
+        width: 42px;
+    }
+
+    .logo h2 {
+        font-size: 18px;
+        margin: 4px 0;
+    }
+
+    .logo h3 {
+        font-size: 15px;
+        margin-bottom: 16px;
+    }
+
+    .field {
+        margin-bottom: 16px;
+    }
+
+    .field label {
+        font-size: 15px;
+    }
+
+    .input,
+    .login-card input {
+        height: 42px !important;
+        font-size: 16px !important; /* evita zoom en iOS */
+        padding: 8px 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Botones apilados */
+    .buttons {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn,
+    .login-card .btn {
+        width: 100% !important;
+        padding: 12px 20px !important;
+        font-size: 15px !important;
+        text-align: center !important;
+    }
+
+    .lg-register-link {
+        font-size: 13px;
+    }
+}
+
+/* Celular muy pequeño */
+@media (max-width: 380px) {
+    .login-card {
+        padding: 22px 14px;
+    }
+
+    .logo img {
+        width: 34px;
+    }
+
+    .logo h2 {
+        font-size: 16px;
+    }
+
+    .logo h3 {
+        font-size: 13px;
+    }
+
+    .field label {
+        font-size: 14px;
+    }
+
+    .btn,
+    .login-card .btn {
+        font-size: 14px !important;
+        padding: 10px 16px !important;
+    }
+}

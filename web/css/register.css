@@ -1,0 +1,276 @@
+/* CONTENEDOR */
+.rg-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    min-height: calc(100vh - 60px);
+}
+
+.rg-outer-box {
+    width: 780px;
+    max-width: 95%;
+    align-self: flex-start;
+}
+
+/* Interior blanco */
+.rg-box {
+    background: white;
+    border: 18px solid #b8b8b8;
+    padding: 36px 30px;
+    border-radius: 6px;
+}
+
+/* CUERPO */
+.rg-body {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* IZQUIERDA */
+.rg-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    min-width: 160px;
+}
+
+/* AVATAR */
+.rg-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid #FD7E14;
+    object-fit: cover;
+    background: #ccc;
+}
+
+/* BOTÓN SUBIR IMAGEN */
+.rg-upload-btn {
+    background: #FD7E14;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.rg-upload-btn:hover {
+    background: #e06a00;
+}
+
+/* DERECHA */
+.rg-right {
+    flex: 1;
+}
+
+.rg-field {
+    margin-bottom: 12px;
+}
+
+.rg-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.rg-input {
+    width: 100%;
+    padding: 10px 12px;
+    background: #d9d9d9;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+    color: #333;
+}
+
+.rg-input:focus {
+    outline: 2px solid #FD7E14;
+    background: #ececec;
+}
+
+/* BOTONES */
+.rg-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    align-items: center;
+}
+
+.rg-btn-outline {
+    border: 2px solid #FD7E14;
+    background: white;
+    padding: 10px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #343A40;
+    font-size: 14px;
+    transition: background 0.2s, color 0.2s;
+    display: inline-block;
+}
+
+.rg-btn-outline:hover {
+    background: #FD7E14;
+    color: white;
+}
+
+.rg-btn-filled {
+    background: #FD7E14;
+    color: white;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.rg-btn-filled:hover {
+    background: #e06a00;
+}
+
+/* PASSWORD STRENGTH */
+#strength {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+
+/* Tablet */
+@media (max-width: 992px) {
+    .rg-container {
+        padding: 30px 20px;
+    }
+
+    .rg-outer-box {
+        width: 100%;
+        max-width: 680px;
+    }
+
+    .rg-box {
+        padding: 30px 24px;
+        border-width: 12px;
+    }
+
+    .rg-avatar {
+        width: 120px;
+        height: 120px;
+    }
+
+    .rg-left {
+        min-width: 130px;
+    }
+}
+
+/* Celular */
+@media (max-width: 768px) {
+    .rg-container {
+        padding: 20px 14px;
+    }
+
+    .rg-outer-box {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .rg-box {
+        padding: 24px 16px;
+        border-width: 8px;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    /* Avatar e inputs apilados verticalmente */
+    .rg-body {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .rg-left {
+        min-width: unset;
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .rg-avatar {
+        width: 100px;
+        height: 100px;
+        border-width: 4px;
+        flex-shrink: 0;
+    }
+
+    .rg-upload-btn {
+        padding: 9px 14px;
+        font-size: 13px;
+    }
+
+    .rg-right {
+        width: 100%;
+    }
+
+    .rg-input {
+        font-size: 16px; /* evita zoom automático en iOS */
+        padding: 11px 12px;
+    }
+
+    .rg-label {
+        font-size: 13px;
+    }
+
+    /* Botones apilados */
+    .rg-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .rg-btn-outline,
+    .rg-btn-filled {
+        width: 100%;
+        text-align: center;
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+}
+
+/* Celular muy pequeño */
+@media (max-width: 380px) {
+    .rg-box {
+        padding: 18px 12px;
+        border-width: 6px;
+    }
+
+    /* Avatar arriba centrado solo */
+    .rg-left {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .rg-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .rg-upload-btn {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    #strength {
+        font-size: 12px;
+    }
+}

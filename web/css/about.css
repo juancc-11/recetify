@@ -1,0 +1,133 @@
+body{
+    background: #1b1b1b;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.about-container{
+    width: 90%;
+    margin: auto;
+    padding: 40px 0;
+}
+
+/* HERO */
+
+.hero-section{
+    background: linear-gradient(135deg, #2b2b2b, #1f1f1f);
+    border-radius: 20px;
+    padding: 50px;
+    margin-bottom: 50px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+.hero-section h1{
+    font-size: 48px;
+    color: #ff7b00;
+    margin-bottom: 20px;
+}
+
+.hero-section p{
+    font-size: 18px;
+    line-height: 1.8;
+    color: #d6d6d6;
+}
+
+/* TEAM */
+.team-section{
+    margin-top: 60px;
+}
+
+.team-title{
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.team-title h2{
+    color: #ff7b00;
+    font-size: 38px;
+}
+
+.carousel{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.carousel-content{
+    width: 80%;
+    position: relative;
+}
+
+.member-card{
+    display: none;
+    background: #262626;
+    border-radius: 20px;
+    padding: 40px;
+    align-items: center;
+    gap: 40px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+
+.member-card.active{
+    display: flex;
+}
+
+.member-card img{
+    width: 280px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 20px;
+    border: 5px solid #ff7b00;
+}
+
+.member-info h3{
+    color: #ff7b00;
+    font-size: 35px;
+}
+
+.member-info h4{
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.member-info p{
+    color: #ddd;
+    line-height: 1.8;
+}
+
+.nav{
+    background: #ff7b00;
+    border: none;
+    color: white;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+
+    /* Centra puntero blanco en el centro */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 25px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.nav:hover{
+    background: #ff9500;
+}
+
+@media(max-width: 768px){
+
+    .member-card.active{
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .member-card img{
+        width: 200px;
+        height: 200px;
+    }
+
+}

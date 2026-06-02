@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /site/logout
+Disallow: /site/delete-account
+Disallow: /site/mis-recetas
+Disallow: /site/profile
+Disallow: /index.php
+
+Sitemap: https://recetifylab.gzgroup.dev/sitemap.xml
