@@ -2,6 +2,8 @@
 
 /** @var yii\web\View $this */
 
+use yii\helpers\Url;
+
 $this->title = 'Recetify Lab';
 
 $this->registerCssFile('@web/css/index.css');
@@ -28,42 +30,33 @@ $this->registerCssFile('@web/css/index.css');
 
         </div>
 
-
         <!-- BUSCADOR -->
-<div class="search-container">
+        <div class="search-container">
 
-    <form
-        action="/blogrecetas/web/index.php"
-        method="GET"
-        class="search-form"
-    >
+            <form
+                action="<?= Url::to(['/recipe/search']) ?>"
+                method="GET"
+                class="search-form"
+            >
 
-        <!-- RUTA -->
-        <input
-            type="hidden"
-            name="r"
-            value="recipe/search"
-        >
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Buscar recetas..."
+                    class="search-input"
+                    required
+                >
 
-        <!-- TEXTO -->
-        <input
-            type="text"
-            name="q"
-            placeholder="Buscar recetas..."
-            class="search-input"
-        >
+                <button
+                    type="submit"
+                    class="btn-search"
+                >
+                    Buscar
+                </button>
 
-        <!-- BOTÓN -->
-        <button
-            type="submit"
-            class="btn-search"
-        >
-            Buscar
-        </button>
+            </form>
 
-    </form>
-
-</div>
+        </div>
 
         <!-- BOTONES -->
         <div class="buttons">
