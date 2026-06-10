@@ -212,18 +212,16 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
         <a href="#" class="rl-sidebar-item">
             <i class="fa-solid fa-bookmark"></i> Guardado
         </a>
-        <a
-    href="<?= Yii::$app->urlManager->createUrl(['recipe/search']) ?>"
-    class="rl-sidebar-item"
->
-    <i class="fa-solid fa-magnifying-glass"></i> Buscar recetas
-</a>
+         <a href="<?= Yii::$app->urlManager->createUrl(['site/mis-recetas']) ?>" class="rl-sidebar-item">
+            <i class="fa-solid fa-utensils"></i> Mis recetas
+        </a>
     </div>
 
     <div class="rl-sidebar-divider"></div>
 
     <div class="rl-sidebar-section">
-        <a href="#" class="rl-sidebar-item">
+        <a href="<?= Yii::$app->urlManager->createUrl(['recipe/search']) ?>"
+            class="rl-sidebar-item">
             <i class="fa-solid fa-magnifying-glass"></i> Buscar recetas
         </a>
         <a href="#" class="rl-sidebar-item">
