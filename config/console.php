@@ -1,8 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
+
+// Cargar variables de entorno
+require_once __DIR__ . '/../init-env.php';
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';

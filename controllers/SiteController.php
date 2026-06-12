@@ -18,16 +18,25 @@ class SiteController extends Controller
     public function behaviors()
     {
         return [
+            // JSON SOLO para acciones del editor
+            'contentNegotiator' => [
+                'class' => \yii\filters\ContentNegotiator::class,
+                'only' => ['get-recipe', 'actualizar-receta', 'subir-imagen-temp'],
+                'formats' => [
+                    'application/json' => Response::FORMAT_JSON,
+                ],
+            ],
+            
             'access' => [
                 'class' => AccessControl::class,
                 'only' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                    'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                   'borrar-receta', 'subir-imagen-temp'],
+                   'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection'],
                 'rules' => [
                     [
                         'actions' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                            'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                           'borrar-receta', 'subir-imagen-temp'],
+                           'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -36,8 +45,13 @@ class SiteController extends Controller
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'logout'         => ['post'],
-                    'delete-account' => ['post'],
+                    'logout'              => ['post'],
+                    'delete-account'      => ['post'],
+                    'get-recipe'          => ['get'],
+                    'actualizar-receta'   => ['post'],
+                    'subir-imagen-temp'   => ['post'],
+                    'toggle-publish'      => ['post'],
+                    'borrar-receta'       => ['post'],
                 ],
             ],
         ];
@@ -263,7 +277,51 @@ class SiteController extends Controller
         ]);
     }
 
-    /* ══════════════════════════════════════════════════════
+    public function actionSitemap()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
+        Yii::$app->response->headers->add('Content-Type', 'application/xml; charset=utf-8');
+
+        $baseUrl = 'https://recetifylab.gzgroup.dev';
+
+        $recetas = \app\models\Recipe::find()
+            ->where(['is_published' => 1, 'is_deleted' => 0])
+            ->orderBy(['created_at' => SORT_DESC])
+            ->all();
+
+        $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+        $staticPages = [
+            ['url' => '/',               'priority' => '1.0', 'freq' => 'daily'],
+            ['url' => '/site/login',     'priority' => '0.4', 'freq' => 'monthly'],
+            ['url' => '/site/register',  'priority' => '0.4', 'freq' => 'monthly'],
+        ];
+
+        foreach ($staticPages as $page) {
+            $xml .= "  <url>\n";
+            $xml .= "    <loc>{$baseUrl}{$page['url']}</loc>\n";
+            $xml .= "    <changefreq>{$page['freq']}</changefreq>\n";
+            $xml .= "    <priority>{$page['priority']}</priority>\n";
+            $xml .= "  </url>\n";
+        }
+
+        foreach ($recetas as $receta) {
+            $url  = $baseUrl . '/site/receta?id=' . $receta->id;
+            $date = date('Y-m-d', strtotime($receta->created_at));
+            $xml .= "  <url>\n";
+            $xml .= "    <loc>" . htmlspecialchars($url) . "</loc>\n";
+            $xml .= "    <lastmod>{$date}</lastmod>\n";
+            $xml .= "    <changefreq>weekly</changefreq>\n";
+            $xml .= "    <priority>0.8</priority>\n";
+            $xml .= "  </url>\n";
+        }
+
+        $xml .= '</urlset>';
+        return $xml;
+    }
+
+/* ══════════════════════════════════════════════════════
        CREAR RECETA
        FIX: lee URLs de Cloudinary enviadas por el JS
             en lugar de intentar re-subir archivos
@@ -351,7 +409,34 @@ class SiteController extends Controller
         return $this->redirect(['site/mis-recetas']);
     }
 
-    /* ── TOGGLE PUBLICAR / DESPUBLICAR ─────────────────────────── */
+    /* ── BORRAR RECETA ──────────────────────────────────────────── */
+    public function actionBorrarReceta()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        if (Yii::$app->user->isGuest) {
+            return ['success' => false, 'message' => 'No autenticado'];
+        }
+
+        $recipeId = (int) Yii::$app->request->post('recipe_id');
+
+        $recipe = \app\models\Recipe::findOne([
+            'id'      => $recipeId,
+            'user_id' => Yii::$app->user->id,
+        ]);
+
+        if (!$recipe) {
+            return ['success' => false, 'message' => 'Receta no encontrada'];
+        }
+
+        if ($recipe->delete()) {
+            return ['success' => true];
+        }
+
+        return ['success' => false, 'message' => 'Error al eliminar'];
+    }
+
+     /* ── TOGGLE PUBLICAR / DESPUBLICAR ─────────────────────────── */
     public function actionTogglePublish()
     {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -380,164 +465,9 @@ class SiteController extends Controller
         }
 
         return ['success' => false, 'message' => 'Error al guardar'];
-    }
+    } 
 
-
-    /* ── OBTENER RECETA (para modal editar) ─────────────────────── */
-    public function actionGetRecipe()
-    {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        if (Yii::$app->user->isGuest) {
-            return ['error' => true, 'message' => 'No autenticado'];
-        }
-
-        $id = (int) Yii::$app->request->get('id');
-
-        // ✅ FIX: buscar también con is_deleted = null por si la columna no tiene default
-        $recipe = \app\models\Recipe::find()
-            ->where(['id' => $id, 'user_id' => Yii::$app->user->id])
-            ->andWhere(['or', ['is_deleted' => 0], ['is_deleted' => null]])
-            ->one();
-
-        if (!$recipe) {
-            return ['error' => true, 'message' => 'Receta no encontrada'];
-        }
-
-        $images = \app\models\RecipeImage::find()
-            ->where(['recipe_id' => $id])
-            ->orderBy(['posicion' => SORT_ASC])
-            ->all();
-
-        $imagesData = array_map(function ($img) {
-            return [
-                'id'        => $img->id,
-                'posicion'  => $img->posicion,
-                'image_url' => $img->image_url,
-            ];
-        }, $images);
-
-        return [
-            'id'                 => $recipe->id,
-            'titulo'             => $recipe->titulo,
-            'descripcion'        => $recipe->descripcion,
-            'utensilios'         => $recipe->utensilios ?? '',
-            'receta_texto'       => $recipe->receta_texto ?? '',
-            'imagen_portada_url' => $recipe->imagen_portada_url ?? '',
-            'images'             => $imagesData,
-        ];
-    }
-
-
-    /* ══════════════════════════════════════════════════════
-       ACTUALIZAR RECETA
-       FIX: lee URLs de Cloudinary para imágenes nuevas
-            en lugar de intentar re-subir archivos
-    ══════════════════════════════════════════════════════ */
-    public function actionActualizarReceta()
-    {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        if (Yii::$app->user->isGuest) {
-            return ['success' => false];
-        }
-
-        $post = Yii::$app->request->post('Recipe', []);
-        $id   = (int) ($post['id'] ?? 0);
-
-        $recipe = \app\models\Recipe::find()
-            ->where(['id' => $id, 'user_id' => Yii::$app->user->id])
-            ->andWhere(['or', ['is_deleted' => 0], ['is_deleted' => null]])
-            ->one();
-
-        if (!$recipe) {
-            return ['success' => false, 'message' => 'Receta no encontrada'];
-        }
-
-        $recipe->titulo       = $post['titulo']       ?? $recipe->titulo;
-        $recipe->descripcion  = $post['descripcion']  ?? $recipe->descripcion;
-        $recipe->utensilios   = $post['utensilios']   ?? $recipe->utensilios;
-        $recipe->receta_texto = $post['receta_texto'] ?? $recipe->receta_texto;
-
-        // Nueva portada (se sube desde el form normal, es el único archivo real)
-        $portada = \yii\web\UploadedFile::getInstanceByName('Recipe[portada]');
-        if ($portada) {
-            $cfg = Yii::$app->params['cloudinary'];
-            $cl  = new \Cloudinary\Cloudinary([
-                'cloud' => [
-                    'cloud_name' => trim($cfg['cloud_name']),
-                    'api_key'    => $cfg['api_key'],
-                    'api_secret' => $cfg['api_secret'],
-                ],
-            ]);
-            $up = $cl->uploadApi()->upload($portada->tempName, ['folder' => 'recetify/recipes']);
-            $recipe->imagen_portada_url = $up['secure_url'];
-        }
-
-        if (!$recipe->save(false)) {
-            return ['success' => false, 'message' => 'Error al guardar'];
-        }
-
-        // ── 1. Borrar imágenes marcadas para eliminar ─────────────
-        $toDelete = $post['delete_image'] ?? [];
-        foreach ($toDelete as $imgId) {
-            $imgId = (int) $imgId;
-            if (!$imgId) continue;
-            $img = \app\models\RecipeImage::findOne(['id' => $imgId, 'recipe_id' => $id]);
-            if ($img) $img->delete();
-        }
-
-        // ── 2. Guardar imágenes nuevas ────────────────────────────
-        // ✅ FIX: el JS ya subió las imágenes a Cloudinary y envía las URLs.
-        //         Solo hay que guardar el registro en BD, sin re-subir nada.
-        $cloudinaryUrls = $post['cloudinary_urls'] ?? [];
-        foreach ($cloudinaryUrls as $pos => $url) {
-            $pos = (int) $pos;
-            $url = trim($url);
-            if (!$url || !in_array($pos, [1, 2, 3])) continue;
-
-            // Si ya existe una imagen en esa posición, actualizarla
-            $img = \app\models\RecipeImage::findOne(['recipe_id' => $id, 'posicion' => $pos]);
-            if (!$img) {
-                $img            = new \app\models\RecipeImage();
-                $img->recipe_id = $id;
-                $img->posicion  = $pos;
-            }
-            $img->image_url = $url;
-            $img->save(false);
-        }
-
-        return ['success' => true];
-    }
-
-    /* ── BORRAR RECETA ──────────────────────────────────────────── */
-    public function actionBorrarReceta()
-    {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        if (Yii::$app->user->isGuest) {
-            return ['success' => false, 'message' => 'No autenticado'];
-        }
-
-        $recipeId = (int) Yii::$app->request->post('recipe_id');
-
-        $recipe = \app\models\Recipe::findOne([
-            'id'      => $recipeId,
-            'user_id' => Yii::$app->user->id,
-        ]);
-
-        if (!$recipe) {
-            return ['success' => false, 'message' => 'Receta no encontrada'];
-        }
-
-        if ($recipe->delete()) {
-            return ['success' => true];
-        }
-
-        return ['success' => false, 'message' => 'Error al eliminar'];
-    }
-
-    /* ── ESTADÍSTICAS DE UNA RECETA ─────────────────────────────── */
+     /* ── ESTADÍSTICAS DE UNA RECETA ─────────────────────────────── */
     public function actionRecipeStats()
     {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -623,31 +553,193 @@ class SiteController extends Controller
         ];
     }
 
-    /* ── SUBIR IMAGEN TEMPORAL A CLOUDINARY ─────────────────────── */
-    public function actionSubirImagenTemp()
+    /* ══════════════════════════════════════════════════════
+       OBTENER RECETA PARA EDITAR
+    ══════════════════════════════════════════════════════ */
+    public function actionGetRecipe()
     {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
         if (Yii::$app->user->isGuest) {
             return ['success' => false, 'message' => 'No autenticado'];
         }
 
-        $file = \yii\web\UploadedFile::getInstanceByName('imagen');
+        $id = (int) Yii::$app->request->get('id');
+
+        if (!$id) {
+            Yii::$app->response->statusCode = 400;
+            return ['success' => false, 'message' => 'ID inválido'];
+        }
+
+        $recipe = \app\models\Recipe::find()
+            ->where([
+                'id' => $id,
+                'user_id' => Yii::$app->user->id
+            ])
+            ->andWhere(['or',
+                ['is_deleted' => 0],
+                ['is_deleted' => null]
+            ])
+            ->one();
+
+        if (!$recipe) {
+            Yii::$app->response->statusCode = 404;
+            return ['success' => false, 'message' => 'Receta no encontrada'];
+        }
+
+        $images = \app\models\RecipeImage::find()
+            ->where(['recipe_id' => $id])
+            ->orderBy(['posicion' => SORT_ASC, 'id' => SORT_ASC])
+            ->all();
+
+        return [
+            'success' => true,
+            'id' => $recipe->id,
+            'titulo' => $recipe->titulo,
+            'descripcion' => $recipe->descripcion,
+            'utensilios' => $recipe->utensilios ?? '',
+            'receta_texto' => $recipe->receta_texto ?? '',
+            'imagen_portada_url' => $recipe->imagen_portada_url ?? '',
+            'images' => array_map(function ($img) {
+                return [
+                    'id' => $img->id,
+                    'posicion' => $img->posicion,
+                    'image_url' => $img->image_url,
+                ];
+            }, $images)
+        ];
+    }
+
+    /* ══════════════════════════════════════════════════════
+       ACTUALIZAR RECETA
+    ══════════════════════════════════════════════════════ */
+    public function actionActualizarReceta()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if (Yii::$app->user->isGuest) {
+            return ['success' => false, 'message' => 'No autenticado'];
+        }
+
+        $post = Yii::$app->request->post('Recipe', []);
+        $id   = (int) ($post['id'] ?? 0);
+
+        $recipe = \app\models\Recipe::find()
+            ->where(['id' => $id, 'user_id' => Yii::$app->user->id])
+            ->andWhere(['or', ['is_deleted' => 0], ['is_deleted' => null]])
+            ->one();
+
+        if (!$recipe) {
+            return ['success' => false, 'message' => 'Receta no encontrada'];
+        }
+
+        $recipe->titulo       = $post['titulo'] ?? $recipe->titulo;
+        $recipe->descripcion  = $post['descripcion'] ?? $recipe->descripcion;
+        $recipe->utensilios   = $post['utensilios'] ?? $recipe->utensilios;
+        $recipe->receta_texto = $post['receta_texto'] ?? $recipe->receta_texto;
+
+        // PORTADA
+        $portada = UploadedFile::getInstanceByName('Recipe[portada]');
+        if ($portada) {
+            $cfg = Yii::$app->params['cloudinary'];
+
+            $cl = new \Cloudinary\Cloudinary([
+                'cloud' => [
+                    'cloud_name' => trim($cfg['cloud_name']),
+                    'api_key'    => $cfg['api_key'],
+                    'api_secret' => $cfg['api_secret'],
+                ],
+            ]);
+
+            $up = $cl->uploadApi()->upload(
+                $portada->tempName,
+                ['folder' => 'recetify/recipes']
+            );
+
+            $recipe->imagen_portada_url = $up['secure_url'];
+        }
+
+        if (!$recipe->save(false)) {
+            return ['success' => false, 'message' => 'Error al guardar receta'];
+        }
+
+        // ── ELIMINAR IMÁGENES ──
+        $toDelete = $post['delete_image'] ?? [];
+        foreach ($toDelete as $imgId) {
+            $img = \app\models\RecipeImage::findOne([
+                'id' => (int)$imgId,
+                'recipe_id' => $id
+            ]);
+            if ($img) $img->delete();
+        }
+
+        // ── GUARDAR NUEVAS IMÁGENES ──
+        $cloudinaryUrls = $post['cloudinary_urls'] ?? [];
+
+        if (!is_array($cloudinaryUrls)) {
+            $cloudinaryUrls = json_decode($cloudinaryUrls, true);
+            if (!is_array($cloudinaryUrls)) {
+                $cloudinaryUrls = [];
+            }
+        }
+
+        foreach ($cloudinaryUrls as $pos => $url) {
+            $pos = (int)$pos;
+            $url = trim($url);
+
+            if (!$url || !in_array($pos, [1, 2, 3])) continue;
+
+            $img = \app\models\RecipeImage::findOne([
+                'recipe_id' => $id,
+                'posicion' => $pos
+            ]);
+
+            if (!$img) {
+                $img = new \app\models\RecipeImage();
+                $img->recipe_id = $id;
+                $img->posicion = $pos;
+            }
+
+            $img->image_url = $url;
+            $img->save(false);
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Receta actualizada correctamente'
+        ];
+    }
+
+    /* ══════════════════════════════════════════════════════
+       SUBIR IMAGEN TEMPORAL A CLOUDINARY
+    ══════════════════════════════════════════════════════ */
+    public function actionSubirImagenTemp()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        if (Yii::$app->user->isGuest) {
+            return ['success' => false, 'message' => 'No autenticado'];
+        }
+
+        $file = UploadedFile::getInstanceByName('imagen');
 
         if (!$file || !$file->tempName) {
             return ['success' => false, 'message' => 'No se recibió imagen'];
         }
 
         $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+
         if (!in_array($file->type, $allowed)) {
             return ['success' => false, 'message' => 'Tipo de archivo no permitido'];
         }
+
         if ($file->size > 5 * 1024 * 1024) {
-            return ['success' => false, 'message' => 'La imagen supera los 5 MB'];
+            return ['success' => false, 'message' => 'Imagen supera 5MB'];
         }
 
         try {
-            $cfg        = Yii::$app->params['cloudinary'];
+            $cfg = Yii::$app->params['cloudinary'];
+
             $cloudinary = new \Cloudinary\Cloudinary([
                 'cloud' => [
                     'cloud_name' => trim($cfg['cloud_name']),
@@ -663,55 +755,227 @@ class SiteController extends Controller
 
             return [
                 'success' => true,
-                'url'     => $upload['secure_url'],
+                'url' => $upload['secure_url']
             ];
 
         } catch (\Exception $e) {
-            return ['success' => false, 'message' => 'Error al subir: ' . $e->getMessage()];
+            return [
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ];
         }
     }
 
-    public function actionSitemap()
-    {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_RAW;
-        Yii::$app->response->headers->add('Content-Type', 'application/xml; charset=utf-8');
+    public function actionSubmitReview()
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    if (Yii::$app->user->isGuest) return ['success' => false, 'message' => 'No autenticado'];
 
-        $baseUrl = 'https://recetifylab.gzgroup.dev';
+    $recipeId = (int) Yii::$app->request->post('recipe_id');
+    $score    = (int) Yii::$app->request->post('score');
+    $body     = trim(Yii::$app->request->post('comment', '')); // campo 'body' en BD
 
-        $recetas = \app\models\Recipe::find()
-            ->where(['is_published' => 1, 'is_deleted' => 0])
-            ->orderBy(['created_at' => SORT_DESC])
-            ->all();
-
-        $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
-
-        $staticPages = [
-            ['url' => '/',               'priority' => '1.0', 'freq' => 'daily'],
-            ['url' => '/site/login',     'priority' => '0.4', 'freq' => 'monthly'],
-            ['url' => '/site/register',  'priority' => '0.4', 'freq' => 'monthly'],
-        ];
-
-        foreach ($staticPages as $page) {
-            $xml .= "  <url>\n";
-            $xml .= "    <loc>{$baseUrl}{$page['url']}</loc>\n";
-            $xml .= "    <changefreq>{$page['freq']}</changefreq>\n";
-            $xml .= "    <priority>{$page['priority']}</priority>\n";
-            $xml .= "  </url>\n";
-        }
-
-        foreach ($recetas as $receta) {
-            $url  = $baseUrl . '/site/receta?id=' . $receta->id;
-            $date = date('Y-m-d', strtotime($receta->created_at));
-            $xml .= "  <url>\n";
-            $xml .= "    <loc>" . htmlspecialchars($url) . "</loc>\n";
-            $xml .= "    <lastmod>{$date}</lastmod>\n";
-            $xml .= "    <changefreq>weekly</changefreq>\n";
-            $xml .= "    <priority>0.8</priority>\n";
-            $xml .= "  </url>\n";
-        }
-
-        $xml .= '</urlset>';
-        return $xml;
+    if (!$recipeId || $score < 1 || $score > 5) {
+        return ['success' => false, 'message' => 'Datos inválidos'];
     }
+
+    // BD requiere body no vacío (CHECK constraint)
+    if (empty($body)) {
+        $body = '⭐'; // placeholder mínimo si no escribe nada
+    }
+
+    $userId = Yii::$app->user->id;
+
+    // Buscar reseña existente o crear nueva
+    $review = \app\models\Comment::findOne([
+        'recipe_id' => $recipeId,
+        'user_id'   => $userId,
+    ]);
+
+    if (!$review) {
+        $review            = new \app\models\Comment();
+        $review->recipe_id = $recipeId;
+        $review->user_id   = $userId;
+    }
+
+    $review->score      = $score;
+    $review->body       = $body;       // ← campo correcto en BD
+    $review->is_visible = 1;
+
+    if (!$review->save(false)) {
+        return ['success' => false, 'message' => 'Error al guardar la reseña'];
+    }
+
+    // Recalcular stats
+    $total = (int) \app\models\Comment::find()
+        ->where(['recipe_id' => $recipeId, 'is_visible' => 1])
+        ->count();
+
+    $avg = \app\models\Comment::find()
+        ->where(['recipe_id' => $recipeId, 'is_visible' => 1])
+        ->average('score') ?? 0;
+
+    // Distribución por estrella
+    $counts       = [];
+    $distribution = [];
+    for ($s = 1; $s <= 5; $s++) {
+        $cnt            = (int) \app\models\Comment::find()
+            ->where(['recipe_id' => $recipeId, 'score' => $s, 'is_visible' => 1])
+            ->count();
+        $counts[$s]       = $cnt;
+        $distribution[$s] = $total > 0 ? round(($cnt / $total) * 100) : 0;
+    }
+
+    return [
+        'success'      => true,
+        'avg'          => round((float) $avg, 2),
+        'total'        => $total,
+        'score'        => $score,
+        'comment'      => $body === '⭐' ? '' : $body, // no mostrar placeholder
+        'username'     => Yii::$app->user->identity->username,
+        'avatar_url'   => Yii::$app->user->identity->avatar_url ?? null,
+        'counts'       => $counts,
+        'distribution' => $distribution,
+    ];
+}
+
+public function actionToggleCollection()
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    if (Yii::$app->user->isGuest) return ['success' => false];
+
+    $recipeId = (int) Yii::$app->request->post('recipe_id');
+    $tipo     = Yii::$app->request->post('tipo');
+    $action   = Yii::$app->request->post('action');
+    $userId   = Yii::$app->user->id;
+
+    if (!in_array($tipo, ['guardado', 'favorito'])) {
+        return ['success' => false, 'message' => 'Tipo inválido'];
+    }
+
+    $db = Yii::$app->db;
+
+    $exists = $db->createCommand(
+        'SELECT COUNT(*) FROM recipe_collections
+         WHERE recipe_id = :rid AND user_id = :uid AND tipo = :tipo',
+        [':rid' => $recipeId, ':uid' => $userId, ':tipo' => $tipo]
+    )->queryScalar();
+
+    if ($action === 'add' && !$exists) {
+        $db->createCommand()->insert('recipe_collections', [
+            'recipe_id' => $recipeId,
+            'user_id'   => $userId,
+            'tipo'      => $tipo,
+        ])->execute();
+    } elseif ($action === 'remove' && $exists) {
+        $db->createCommand()->delete('recipe_collections', [
+            'recipe_id' => $recipeId,
+            'user_id'   => $userId,
+            'tipo'      => $tipo,
+        ])->execute();
+    }
+
+    return ['success' => true];
+}
+
+public function actionPreLectura($id)
+{
+    $id = (int) $id;
+
+    $recipe = \app\models\Recipe::findOne([
+        'id'           => $id,
+        'is_published' => 1,
+        'is_deleted'   => 0,
+    ]);
+
+    if (!$recipe) {
+        throw new \yii\web\NotFoundHttpException('Receta no encontrada');
+    }
+
+    // Tags de la receta
+    $tags = $recipe->tags;
+
+    // Comentarios visibles ordenados por fecha desc
+    $comments = \app\models\Comment::find()
+        ->where(['recipe_id' => $id, 'is_visible' => 1])
+        ->orderBy(['created_at' => SORT_DESC])
+        ->all();
+
+    // Stats
+    $total = count($comments);
+    $avgScore = $total > 0
+        ? array_sum(array_map(fn($c) => $c->score, $comments)) / $total
+        : 0;
+
+    // Distribución de estrellas
+    $starCounts       = [];
+    $starDistribution = [];
+    for ($s = 1; $s <= 5; $s++) {
+        $cnt = (int) \app\models\Comment::find()
+            ->where(['recipe_id' => $id, 'score' => $s, 'is_visible' => 1])
+            ->count();
+        $starCounts[$s]       = $cnt;
+        $starDistribution[$s] = $total > 0 ? round(($cnt / $total) * 100) : 0;
+    }
+
+    // Inyectar avgScore en el objeto receta para usarlo en la vista
+    $recipe->populateRelation('avgScore', round($avgScore, 1));
+
+    // Colección del usuario y su reseña previa
+    $collection = [];
+    $userReview = null;
+
+    if (!Yii::$app->user->isGuest) {
+        $userId = Yii::$app->user->id;
+
+        foreach (['guardado', 'favorito'] as $tipo) {
+            $collection[$tipo] = (bool) Yii::$app->db->createCommand(
+                'SELECT COUNT(*) FROM recipe_collections
+                 WHERE recipe_id = :rid AND user_id = :uid AND tipo = :tipo',
+                [':rid' => $id, ':uid' => $userId, ':tipo' => $tipo]
+            )->queryScalar();
+        }
+
+        $userReview = \app\models\Comment::findOne([
+            'recipe_id' => $id,
+            'user_id'   => $userId,
+        ]);
+    }
+
+    // Registrar visita del día
+    $today = date('Y-m-d');
+    $db    = Yii::$app->db;
+    $viewExists = $db->createCommand(
+        'SELECT id FROM recipe_views WHERE recipe_id = :rid AND view_date = :date',
+        [':rid' => $id, ':date' => $today]
+    )->queryScalar();
+
+    if ($viewExists) {
+        $db->createCommand(
+            'UPDATE recipe_views SET views = views + 1
+             WHERE recipe_id = :rid AND view_date = :date',
+            [':rid' => $id, ':date' => $today]
+        )->execute();
+    } else {
+        $db->createCommand()->insert('recipe_views', [
+            'recipe_id' => $id,
+            'view_date' => $today,
+            'views'     => 1,
+        ])->execute();
+    }
+
+    return $this->render('pre_lectura', [
+        'recipe'           => $recipe,
+        'tags'             => $tags,
+        'comments'         => $comments,
+        'starCounts'       => $starCounts,
+        'starDistribution' => $starDistribution,
+        'collection'       => $collection,
+        'userReview'       => $userReview ? [
+            'score'   => $userReview->score,
+            'comment' => $userReview->body, // ← campo body
+        ] : null,
+    ]);
+}
+    
 }

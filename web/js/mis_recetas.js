@@ -44,7 +44,7 @@ $(function () {
     function togglePublish(id, val, $btn) {
         showLoading();
         $.post(
-            BASE_URL + '/index.php?r=site/toggle-publish',
+            BASE_URL + '/site/toggle-publish',
             { _csrf: CSRF_TOKEN, recipe_id: id, published: val },
             function (r) {
                 if (r.success) {
@@ -52,11 +52,13 @@ $(function () {
                         .text(val ? 'Despublicar' : 'Publicar')
                         .toggleClass('despublicar', val === 1);
                 } else {
-                    alert('No se pudo actualizar.');
+                    alert('No se pudo actualizar: ' + (r.message || 'Error desconocido'));
                 }
-            }
-        ).fail(function () {
-            alert('Error de conexión.');
+            },
+            'json'
+        ).fail(function (xhr) {
+            console.error('[TOGGLE-PUBLISH] Error:', xhr.status, xhr.responseText);
+            alert('Error de conexión. (Código: ' + xhr.status + ')');
         }).always(hideLoading);
     }
 
@@ -90,7 +92,7 @@ $(function () {
         const $btn = $(this).prop('disabled', true).text('Eliminando…');
         showLoading();
         $.post(
-            BASE_URL + '/index.php?r=site/borrar-receta',
+            BASE_URL + '/site/borrar-receta',
             { _csrf: CSRF_TOKEN, recipe_id: recipeIdToDelete },
             function (r) {
                 if (r.success) {
@@ -107,9 +109,11 @@ $(function () {
                     alert(r.message || 'No se pudo eliminar.');
                     $btn.prop('disabled', false).text('Sí, eliminar');
                 }
-            }
-        ).fail(function () {
-            alert('Error de conexión.');
+            },
+            'json'
+        ).fail(function (xhr) {
+            console.error('[BORRAR-RECETA] Error:', xhr.status, xhr.responseText);
+            alert('Error de conexión. (Código: ' + xhr.status + ')');
             $btn.prop('disabled', false).text('Sí, eliminar');
         }).always(hideLoading);
     });
@@ -128,7 +132,7 @@ $(function () {
         }
         showLoading();
         $('#stats-content').html('<div class="stats-placeholder"><p>Cargando…</p></div>');
-        $.get(BASE_URL + '/index.php?r=site/recipe-stats', { recipe_id: id }, function (d) {
+        $.get(BASE_URL + '/site/recipe-stats', { recipe_id: id }, function (d) {
             if (!d || d.error) {
                 $('#stats-content').html('<div class="stats-placeholder"><p>Sin datos.</p></div>');
                 return;
@@ -188,8 +192,9 @@ $(function () {
                     (tot > 0 ? Math.max(4, Math.round((1 - (pos - 1) / tot) * 100)) : 0) + '%'
                 );
             }, 100);
-        }).fail(function () {
-            $('#stats-content').html('<div class="stats-placeholder"><p>Error.</p></div>');
+        }).fail(function (xhr) {
+            console.error('[RECIPE-STATS] Error:', xhr.status, xhr.responseText);
+            $('#stats-content').html('<div class="stats-placeholder"><p>Error al cargar. (Código: ' + xhr.status + ')</p></div>');
         }).always(hideLoading);
     });
 
@@ -219,7 +224,7 @@ $(function () {
         fd.append('_csrf', CSRF_TOKEN);
 
         $.ajax({
-            url:         BASE_URL + '/index.php?r=site/subir-imagen-temp',
+            url:         BASE_URL + '/site/subir-imagen-temp',
             type:        'POST',
             data:        fd,
             xhrFields: { withCredentials: true },
@@ -243,8 +248,9 @@ $(function () {
                     $slot.data('uploading', false);
                 }
             },
-            error: function () {
-                alert('Error de conexión al subir la imagen.');
+            error: function (xhr, status, error) {
+                console.error('[SUBIR-IMAGEN-TEMP] Error:', xhr.status, xhr.responseText);
+                alert('Error de conexión al subir la imagen. (Código: ' + xhr.status + ')');
                 $slot.find('.slot-preview').attr('src', '').css('opacity', '1');
                 $slot.find('.slot-preview-wrap').hide();
                 $slot.removeClass('has-image');
@@ -311,40 +317,53 @@ $(function () {
 
     // Toolbar de insertar imagen — usa siempre URL de Cloudinary
     function refreshToolbar(ctx) {
-        const { $toolbar } = getEditorEls(ctx);
-        const isEdit = ctx === 'editar';
-        const imgs   = [];
+    const { $toolbar } = getEditorEls(ctx);
+    const isEdit = ctx === 'editar';
+    const imgs   = [];
 
-        // Portada
-        const portSrc = (isEdit ? $('#edit-portada-preview') : $('#portada-preview'))
-            .find('img').attr('src');
-        if (portSrc) imgs.push({ label: 'Portada', src: portSrc });
+    const portSrc = (isEdit ? $('#edit-portada-preview') : $('#portada-preview'))
+        .find('img').attr('src');
 
-        // Slots extra — usar URL de Cloudinary si existe, nunca blob
-        const prefix = isEdit ? '#edit-extra-slot-' : '#extra-slot-';
-        [1, 2, 3].forEach(function (n) {
-            const $slot    = $(prefix + n);
-            const cloudUrl = $slot.data('cloudinary-url');
-            const preview  = $slot.find('.slot-preview').attr('src');
-            const src = cloudUrl || (preview && preview.indexOf('blob:') === -1 ? preview : null);
-            if (src) imgs.push({ label: 'Imagen ' + n, src: src });
-        });
+    if (portSrc) imgs.push({ label: 'Portada', src: portSrc });
 
-        $toolbar.empty();
-        if (!imgs.length) { $toolbar.hide(); return; }
-        $toolbar.show();
+    for (let n = 1; n <= 3; n++) {
+        const $slot = isEdit
+            ? $('#edit-extra-slot-' + n)
+            : $('#extra-slot-' + n);
 
-        imgs.forEach(function (img) {
-            const $btn = $('<button type="button" class="insert-img-btn"></button>')
-                .html('<img class="btn-img-thumb" src="' + img.src + '" alt=""> ' + img.label);
-            $btn.on('click', function () {
-                const { $editor } = getEditorEls(ctx);
-                $editor.focus();
-                insertImgInEditor($editor, img.src);
-            });
-            $toolbar.append($btn);
-        });
+        if (!$slot.length) continue;
+
+        const cloudUrl = $slot.data('cloudinary-url');
+        const preview  = $slot.find('.slot-preview').attr('src');
+
+        const src = cloudUrl || (preview && preview.indexOf('blob:') === -1 ? preview : null);
+
+        if (src) {
+            imgs.push({ label: 'Imagen ' + n, src: src });
+        }
     }
+
+    $toolbar.empty();
+
+    if (imgs.length === 0) {
+        $toolbar.hide();
+        return;
+    }
+
+    $toolbar.show();
+
+    imgs.forEach(function (img) {
+        const $btn = $('<button type="button" class="insert-img-btn"></button>')
+            .html('<img class="btn-img-thumb" src="' + img.src + '"> ' + img.label);
+
+        $btn.on('click', function () {
+            const { $editor } = getEditorEls(ctx);
+            insertImgInEditor($editor, img.src);
+        });
+
+        $toolbar.append($btn);
+    });
+}
 
     function insertImgInEditor($editor, src) {
         const $wrap = buildImgWrap(src, 220);
@@ -666,19 +685,29 @@ $(function () {
         });
     }
 
-    /* ── FIX: Modal editar — carga receta con log de depuración ── */
-    $(document).on('click', '.btn-editar', function () {
-        const recipeId = $(this).data('recipe-id');
-        openModal();
-        showLoading();
+    /* ── MODAL EDITAR — CARGA RECETA ── */
+$(document).on('click', '.btn-editar', function () {
+    const recipeId = $(this).data('recipe-id');
 
-        $.get(BASE_URL + '/index.php?r=site/get-recipe', { id: recipeId }, function (res) {
+    openModal();
+    showLoading();
 
-            // ✅ FIX: log para ver qué devuelve el servidor
-            console.log('[editar] get-recipe respuesta:', res);
+    $.get(BASE_URL + '/site/get-recipe', { id: recipeId })
+        .done(function (res) {
 
-            if (!res || res.error) {
-                alert('No se pudo cargar la receta. Error: ' + (res ? res.message : 'respuesta vacía'));
+            if (typeof res === 'string') {
+                try {
+                    res = JSON.parse(res);
+                } catch (e) {
+                    console.error('Respuesta no JSON:', res);
+                    alert('Error de servidor');
+                    closeModal();
+                    return;
+                }
+            }
+
+            if (!res || !res.success || res.error) {
+                alert('No se pudo cargar la receta');
                 closeModal();
                 return;
             }
@@ -691,19 +720,20 @@ $(function () {
 
             if (res.imagen_portada_url) {
                 $('#edit-portada-preview').html(
-                    '<img src="' + res.imagen_portada_url + '" alt="Portada">'
+                    '<img src="' + res.imagen_portada_url + '">'
                 );
             }
 
             resetEditSlots();
 
-            // ✅ FIX: cargar imágenes extra existentes — guardar cloudinary-url
             if (res.images && res.images.length) {
                 res.images.forEach(function (img) {
                     const $slot = $('#edit-extra-slot-' + img.posicion);
                     if (!$slot.length) return;
+
                     $slot.data('img-id', img.id);
                     $slot.data('cloudinary-url', img.image_url);
+
                     $slot.find('.slot-preview').attr('src', img.image_url);
                     $slot.find('.slot-preview-wrap').show();
                     $slot.addClass('has-image');
@@ -711,15 +741,15 @@ $(function () {
             }
 
             loadEditorContent($('#edit-receta-editor'), res.receta_texto);
-            setTimeout(function () { refreshToolbar('editar'); }, 80);
-
-        }).fail(function (xhr) {
-            // ✅ FIX: mostrar código de error HTTP para diagnosticar
-            console.error('[editar] Error HTTP:', xhr.status, xhr.responseText);
-            alert('Error de conexión. Código: ' + xhr.status + '. Revisa la consola del navegador.');
+            setTimeout(() => refreshToolbar('editar'), 100);
+        })
+        .fail(function (xhr) {
+            console.error('[GET-RECIPE] Error:', xhr.status, xhr.responseText);
+            alert('Error cargando receta: ' + xhr.status);
             closeModal();
-        }).always(hideLoading);
-    });
+        })
+        .always(hideLoading);
+});
 
     $('#modal-close-btn, #modal-close-btn-2').on('click', closeModal);
     $modal.on('click', function (e) { if ($(e.target).is($modal)) closeModal(); });
@@ -802,7 +832,7 @@ $(function () {
         showLoading();
 
         $.ajax({
-            url:         BASE_URL + '/index.php?r=site/actualizar-receta',
+            url:         BASE_URL + '/site/actualizar-receta',
             type:        'POST',
             data:        fd,
             xhrFields: { withCredentials: true },
@@ -819,7 +849,7 @@ $(function () {
                 }
             },
             error: function (xhr) {
-                console.error('[editar] Submit error:', xhr.status, xhr.responseText);
+                console.error('[ACTUALIZAR-RECETA] Error:', xhr.status, xhr.responseText);
                 alert('Error de conexión. Código: ' + xhr.status);
                 $btn.prop('disabled', false).text('Guardar cambios');
             }

@@ -265,10 +265,7 @@ $this->registerCssFile('@web/css/search.css');
                         <div class="recipe-buttons">
 
                             <a
-                                href="<?= Url::to([
-                                    'recipe/view',
-                                    'id' => $recipe['id']
-                                ]) ?>"
+                                href="<?= Url::to(['site/pre-lectura', 'id' => $recipe['id']]) ?>"
                                 class="btn-read"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

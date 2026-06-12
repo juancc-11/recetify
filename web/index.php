@@ -2,12 +2,16 @@
 
 require __DIR__ . '/../vendor/autoload.php'; //funcion require para carga clases automáticamente
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->safeLoad();
+// Cargar variables de entorno - DEBE ser lo primero
+require __DIR__ . '/../init-env.php';
+
+// Usar la función env() para obtener valores (usa $_ENV internamente)
+$yii_debug = env('YII_DEBUG', 'false');
+$yii_env = env('YII_ENV', 'prod');
 
 // comment out the following two lines when deployed to production
-defined('YII_DEBUG') or define('YII_DEBUG', getenv('YII_DEBUG') === 'true');
-defined('YII_ENV') or define('YII_ENV', getenv('YII_ENV') ?: 'prod');
+defined('YII_DEBUG') or define('YII_DEBUG', $yii_debug === 'true');
+defined('YII_ENV') or define('YII_ENV', $yii_env);
 
 require __DIR__ . '/../vendor/yiisoft/yii2/Yii.php'; //inicia el framework Yii
 

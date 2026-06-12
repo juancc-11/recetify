@@ -48,6 +48,7 @@ $config = [
             'showScriptName' => false,
             'rules' => [
                 'sitemap.xml' => 'site/sitemap',
+                'receta/<id:\d+>'     => 'site/pre-lectura',
             ],
         ],
       
