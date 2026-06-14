@@ -31,12 +31,12 @@ class SiteController extends Controller
                 'class' => AccessControl::class,
                 'only' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                    'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                   'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection'],
+                   'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection', 'subir-comment'],
                 'rules' => [
                     [
                         'actions' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                            'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                           'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection'],
+                           'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection', 'subir-comment'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -842,40 +842,52 @@ class SiteController extends Controller
 public function actionToggleCollection()
 {
     Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-    if (Yii::$app->user->isGuest) return ['success' => false];
 
-    $recipeId = (int) Yii::$app->request->post('recipe_id');
-    $tipo     = Yii::$app->request->post('tipo');
-    $action   = Yii::$app->request->post('action');
-    $userId   = Yii::$app->user->id;
+    try {
+        if (Yii::$app->user->isGuest) return ['success' => false, 'message' => 'No autenticado'];
 
-    if (!in_array($tipo, ['guardado', 'favorito'])) {
-        return ['success' => false, 'message' => 'Tipo inválido'];
+        $recipeId = (int) Yii::$app->request->post('recipe_id');
+        $tipo     = Yii::$app->request->post('tipo');
+        $action   = Yii::$app->request->post('action');
+        $userId   = Yii::$app->user->id;
+
+        if (!in_array($tipo, ['guardado', 'favorito'])) {
+            return ['success' => false, 'message' => 'Tipo inválido'];
+        }
+
+        $db = Yii::$app->db;
+
+        $exists = (int) $db->createCommand(
+            'SELECT COUNT(*) FROM recipe_collections
+             WHERE recipe_id = :rid AND user_id = :uid AND tipo = :tipo',
+            [':rid' => $recipeId, ':uid' => $userId, ':tipo' => $tipo]
+        )->queryScalar();
+
+        if ($action === 'add' && !$exists) {
+            $db->createCommand()->insert('recipe_collections', [
+                'recipe_id' => $recipeId,
+                'user_id'   => $userId,
+                'tipo'      => $tipo,
+            ])->execute();
+        } elseif ($action === 'remove' && $exists) {
+            $db->createCommand()->delete('recipe_collections', [
+                'recipe_id' => $recipeId,
+                'user_id'   => $userId,
+                'tipo'      => $tipo,
+            ])->execute();
+        }
+
+        return ['success' => true];
+
+    } catch (\Throwable $e) {
+        Yii::$app->response->statusCode = 500;
+        return [
+            'success' => false,
+            'message' => 'Excepción: ' . $e->getMessage(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+        ];
     }
-
-    $db = Yii::$app->db;
-
-    $exists = $db->createCommand(
-        'SELECT COUNT(*) FROM recipe_collections
-         WHERE recipe_id = :rid AND user_id = :uid AND tipo = :tipo',
-        [':rid' => $recipeId, ':uid' => $userId, ':tipo' => $tipo]
-    )->queryScalar();
-
-    if ($action === 'add' && !$exists) {
-        $db->createCommand()->insert('recipe_collections', [
-            'recipe_id' => $recipeId,
-            'user_id'   => $userId,
-            'tipo'      => $tipo,
-        ])->execute();
-    } elseif ($action === 'remove' && $exists) {
-        $db->createCommand()->delete('recipe_collections', [
-            'recipe_id' => $recipeId,
-            'user_id'   => $userId,
-            'tipo'      => $tipo,
-        ])->execute();
-    }
-
-    return ['success' => true];
 }
 
 public function actionPreLectura($id)
@@ -892,20 +904,30 @@ public function actionPreLectura($id)
         throw new \yii\web\NotFoundHttpException('Receta no encontrada');
     }
 
-    // Tags de la receta
+    // Tags
     $tags = $recipe->tags;
 
-    // Comentarios visibles ordenados por fecha desc
+    // Autor
+    $author = \app\models\User::findOne($recipe->user_id);
+
+    // Comentarios visibles
     $comments = \app\models\Comment::find()
         ->where(['recipe_id' => $id, 'is_visible' => 1])
         ->orderBy(['created_at' => SORT_DESC])
         ->all();
 
+    // Cargar usuario de cada comentario
+    $commentUsers = [];
+    foreach ($comments as $comment) {
+        $commentUsers[$comment->user_id] = \app\models\User::findOne($comment->user_id);
+    }
+
     // Stats
-    $total = count($comments);
+    $total    = count($comments);
     $avgScore = $total > 0
         ? array_sum(array_map(fn($c) => $c->score, $comments)) / $total
         : 0;
+    $avgScore = round($avgScore, 1);
 
     // Distribución de estrellas
     $starCounts       = [];
@@ -918,16 +940,18 @@ public function actionPreLectura($id)
         $starDistribution[$s] = $total > 0 ? round(($cnt / $total) * 100) : 0;
     }
 
-    // Inyectar avgScore en el objeto receta para usarlo en la vista
-    $recipe->populateRelation('avgScore', round($avgScore, 1));
+    // Visitas totales
+    $totalViews = (int) Yii::$app->db->createCommand(
+        'SELECT COALESCE(SUM(views),0) FROM recipe_views WHERE recipe_id = :rid',
+        [':rid' => $id]
+    )->queryScalar();
 
-    // Colección del usuario y su reseña previa
+    // Colección y reseña del usuario
     $collection = [];
     $userReview = null;
 
     if (!Yii::$app->user->isGuest) {
         $userId = Yii::$app->user->id;
-
         foreach (['guardado', 'favorito'] as $tipo) {
             $collection[$tipo] = (bool) Yii::$app->db->createCommand(
                 'SELECT COUNT(*) FROM recipe_collections
@@ -935,7 +959,6 @@ public function actionPreLectura($id)
                 [':rid' => $id, ':uid' => $userId, ':tipo' => $tipo]
             )->queryScalar();
         }
-
         $userReview = \app\models\Comment::findOne([
             'recipe_id' => $id,
             'user_id'   => $userId,
@@ -966,16 +989,122 @@ public function actionPreLectura($id)
 
     return $this->render('pre_lectura', [
         'recipe'           => $recipe,
+        'author'           => $author,
         'tags'             => $tags,
         'comments'         => $comments,
+        'commentUsers'     => $commentUsers,
+        'avgScore'         => $avgScore,
+        'totalComments'    => $total,
+        'totalViews'       => $totalViews,
         'starCounts'       => $starCounts,
         'starDistribution' => $starDistribution,
         'collection'       => $collection,
         'userReview'       => $userReview ? [
             'score'   => $userReview->score,
-            'comment' => $userReview->body, // ← campo body
+            'comment' => $userReview->body,
         ] : null,
     ]);
+}
+
+public function actionSubirComment()
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+    try {
+        if (Yii::$app->user->isGuest) {
+            return ['success' => false, 'message' => 'No autenticado'];
+        }
+
+        $recipeId = (int) Yii::$app->request->post('recipe_id');
+        $score    = (int) Yii::$app->request->post('score');
+        $body     = trim(Yii::$app->request->post('comment', ''));
+
+        if (!$recipeId) {
+            return ['success' => false, 'message' => 'ID de receta inválido'];
+        }
+        if ($score < 1 || $score > 5) {
+            return ['success' => false, 'message' => 'Calificación inválida (1-5)'];
+        }
+
+        if (empty($body)) {
+            $body = (string) $score;
+        }
+
+        $recipe = \app\models\Recipe::findOne([
+            'id'           => $recipeId,
+            'is_published' => 1,
+            'is_deleted'   => 0,
+        ]);
+        if (!$recipe) {
+            return ['success' => false, 'message' => 'Receta no encontrada'];
+        }
+
+        $userId = Yii::$app->user->id;
+
+        $comment = \app\models\Comment::findOne([
+            'recipe_id' => $recipeId,
+            'user_id'   => $userId,
+        ]);
+
+        if (!$comment) {
+            $comment            = new \app\models\Comment();
+            $comment->recipe_id = $recipeId;
+            $comment->user_id   = $userId;
+        }
+
+        $comment->score      = $score;
+        $comment->body       = $body;
+        $comment->is_visible = 1;
+
+        if (!$comment->save()) {
+            return [
+                'success' => false,
+                'message' => 'Error al guardar',
+                'errors'  => $comment->errors,
+            ];
+        }
+
+        $total = (int) \app\models\Comment::find()
+            ->where(['recipe_id' => $recipeId, 'is_visible' => 1])
+            ->count();
+
+        $avg = (float) (\app\models\Comment::find()
+            ->where(['recipe_id' => $recipeId, 'is_visible' => 1])
+            ->average('score') ?? 0);
+
+        $counts       = [];
+        $distribution = [];
+        for ($s = 1; $s <= 5; $s++) {
+            $cnt              = (int) \app\models\Comment::find()
+                ->where(['recipe_id' => $recipeId, 'score' => $s, 'is_visible' => 1])
+                ->count();
+            $counts[$s]       = $cnt;
+            $distribution[$s] = $total > 0 ? round(($cnt / $total) * 100) : 0;
+        }
+
+        $displayComment = ((string)$score === $body) ? '' : $body;
+
+        return [
+            'success'      => true,
+            'avg'          => round($avg, 2),
+            'total'        => $total,
+            'score'        => $score,
+            'comment'      => $displayComment,
+            'username'     => Yii::$app->user->identity->username,
+            'avatar_url'   => Yii::$app->user->identity->avatar_url ?? null,
+            'counts'       => $counts,
+            'distribution' => $distribution,
+        ];
+
+    } catch (\Throwable $e) {
+        Yii::$app->response->statusCode = 500;
+        return [
+            'success' => false,
+            'message' => 'Excepción: ' . $e->getMessage(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+        ];
+    }
 }
     
 }

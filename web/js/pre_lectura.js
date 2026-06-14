@@ -25,17 +25,15 @@ $(function () {
     /* ══════════════════════════════════════════════
        2. DROPDOWN AÑADIR (Guardar / Favorito)
     ══════════════════════════════════════════════ */
-    var $addBtn      = $('#pl-btn-add');
-    var $dropdown    = $('#pl-add-dropdown');
-    var $chevron     = $('#pl-chevron');
-    var $addLabel    = $('#pl-add-label');
-    var $addIcon     = $('#pl-add-icon');
+    var $addBtn   = $('#pl-btn-add');
+    var $dropdown = $('#pl-add-dropdown');
+    var $chevron  = $('#pl-chevron');
+    var $addLabel = $('#pl-add-label');
+    var $addIcon  = $('#pl-add-icon');
 
-    // Estado inicial desde servidor
     var savedGuardado = COLLECTION && COLLECTION.guardado ? true : false;
     var savedFavorito = COLLECTION && COLLECTION.favorito ? true : false;
 
-    // Inicializar estado visual
     updateAddBtn();
 
     function updateAddBtn() {
@@ -56,13 +54,10 @@ $(function () {
             $addLabel.text('Guardar');
             $addIcon.removeClass().addClass('fa-solid fa-bookmark');
         }
-
-        // Estado visual de los items del dropdown
         $('#btn-guardar').toggleClass('active-item', savedGuardado);
         $('#btn-favorito').toggleClass('active-item', savedFavorito);
     }
 
-    // Abrir / cerrar dropdown
     $addBtn.on('click', function (e) {
         e.stopPropagation();
         if (IS_GUEST) {
@@ -73,7 +68,6 @@ $(function () {
         $chevron.toggleClass('open');
     });
 
-    // Cerrar al hacer clic fuera
     $(document).on('click', function (e) {
         if (!$('#pl-add-wrap').length) return;
         if (!$('#pl-add-wrap')[0].contains(e.target)) {
@@ -82,36 +76,42 @@ $(function () {
         }
     });
 
-    // Clic en Guardar / Favorito
     $('.pl-dropdown-item').on('click', function () {
-        var tipo = $(this).data('tipo');
-        if (IS_GUEST) return;
-
+        var tipo     = $(this).data('tipo');
         var isActive = tipo === 'guardado' ? savedGuardado : savedFavorito;
         var action   = isActive ? 'remove' : 'add';
 
         showLoading();
 
-        $.post(BASE_URL + '/index.php?r=site/toggle-collection', {
-            _csrf:     CSRF_TOKEN,
-            recipe_id: RECIPE_ID,
-            tipo:      tipo,
-            action:    action,
-        }, function (r) {
-            if (r.success) {
-                if (tipo === 'guardado') {
-                    savedGuardado = !savedGuardado;
+        $.ajax({
+            url:       BASE_URL + '/site/toggle-collection',
+            type:      'POST',
+            xhrFields: { withCredentials: true },
+            data: {
+                _csrf:     CSRF_TOKEN,
+                recipe_id: RECIPE_ID,
+                tipo:      tipo,
+                action:    action,
+            },
+            dataType: 'json',
+            success: function (r) {
+                if (r.success) {
+                    if (tipo === 'guardado') {
+                        savedGuardado = !savedGuardado;
+                    } else {
+                        savedFavorito = !savedFavorito;
+                    }
+                    updateAddBtn();
+                    $dropdown.removeClass('open');
+                    $chevron.removeClass('open');
                 } else {
-                    savedFavorito = !savedFavorito;
+                    alert(r.message || 'No se pudo actualizar.');
                 }
-                updateAddBtn();
-                $dropdown.removeClass('open');
-                $chevron.removeClass('open');
-            } else {
-                alert(r.message || 'No se pudo actualizar.');
+            },
+            error: function (xhr) {
+                console.error('[TOGGLE-COLLECTION] Error:', xhr.status, xhr.responseText);
+                alert('Error de conexión. (Código: ' + xhr.status + ')');
             }
-        }).fail(function () {
-            alert('Error de conexión.');
         }).always(hideLoading);
     });
 
@@ -121,26 +121,23 @@ $(function () {
     ══════════════════════════════════════════════ */
     var selectedStars = 0;
 
-    // Si ya tiene reseña previa, cargarla
     if (USER_REVIEW) {
         selectedStars = USER_REVIEW.score || 0;
         if (USER_REVIEW.comment) {
             $('#review-text').val(USER_REVIEW.comment);
         }
         renderStars(selectedStars);
-        $('#btn-submit-review').prop('disabled', false)
+        $('#btn-submit-review')
+            .prop('disabled', false)
             .text('Actualizar reseña');
     }
 
-    // Hover
     $('#star-picker .pl-star-btn').on('mouseenter', function () {
-        var val = parseInt($(this).data('val'));
-        highlightStars(val);
+        highlightStars(parseInt($(this).data('val')));
     }).on('mouseleave', function () {
         renderStars(selectedStars);
     });
 
-    // Click
     $('#star-picker .pl-star-btn').on('click', function () {
         selectedStars = parseInt($(this).data('val'));
         renderStars(selectedStars);
@@ -183,44 +180,51 @@ $(function () {
         var $btn = $(this).prop('disabled', true).text('Publicando…');
         showLoading();
 
-        $.post(BASE_URL + '/index.php?r=site/submit-review', {
-            _csrf:     CSRF_TOKEN,
-            recipe_id: RECIPE_ID,
-            score:     selectedStars,
-            comment:   $('#review-text').val().trim(),
-        }, function (r) {
-            if (r.success) {
-                // Actualizar stats en pantalla
-                $('#avg-value').text(r.avg.toFixed(1));
-                $('#review-count').text('(' + r.total + ' reseñas)');
-                $('#big-score').text(r.avg.toFixed(1));
-                $('#total-votes').text(r.total + ' votos');
+        $.ajax({
+            url:       BASE_URL + '/site/subir-comment',
+            type:      'POST',
+            xhrFields: { withCredentials: true },
+            data: {
+                _csrf:     CSRF_TOKEN,
+                recipe_id: RECIPE_ID,
+                score:     selectedStars,
+                comment:   $('#review-text').val().trim(),
+            },
+            dataType: 'json',
+            success: function (r) {
+                if (r.success) {
+                    $('#avg-value').text(r.avg.toFixed(1));
+                    $('#review-count').text('(' + r.total + ' reseñas)');
+                    $('#big-score').text(r.avg.toFixed(1));
+                    $('#total-votes').text(r.total + ' votos');
 
-                // Actualizar barras
-                if (r.distribution) {
-                    for (var s = 1; s <= 5; s++) {
-                        var pct = r.distribution[s] || 0;
-                        $('[data-star="' + s + '"]').css('width', pct + '%');
-                        $('#star-count-' + s).text(r.counts[s] || 0);
+                    if (r.distribution) {
+                        for (var s = 1; s <= 5; s++) {
+                            var pct = r.distribution[s] || 0;
+                            $('[data-star="' + s + '"]').css('width', pct + '%');
+                            $('#star-count-' + s).text(r.counts[s] || 0);
+                        }
                     }
-                }
 
-                // Actualizar stars del resumen
-                renderSummaryStars(r.avg);
+                    renderSummaryStars(r.avg);
 
-                // Agregar reseña a la lista si tiene comentario
-                if (r.comment) {
                     addReviewToList(r);
-                }
 
-                $btn.text('Reseña publicada ✓').prop('disabled', true);
-            } else {
-                alert(r.message || 'No se pudo publicar.');
+                    $btn.text('Reseña publicada ✓').prop('disabled', true);
+                } else {
+                    var msg = r.message || 'No se pudo publicar.';
+                    if (r.errors) {
+                        msg += '\nErrores: ' + JSON.stringify(r.errors);
+                    }
+                    alert(msg);
+                    $btn.prop('disabled', false).text('Publicar reseña');
+                }
+            },
+            error: function (xhr) {
+                console.error('[SUBIR-COMMENT] Error:', xhr.status, xhr.responseText);
+                alert('Error de conexión. (Código: ' + xhr.status + ')');
                 $btn.prop('disabled', false).text('Publicar reseña');
             }
-        }).fail(function () {
-            alert('Error de conexión.');
-            $btn.prop('disabled', false).text('Publicar reseña');
         }).always(hideLoading);
     });
 
@@ -246,12 +250,14 @@ $(function () {
         for (var i = 1; i <= 5; i++) {
             starsHtml += i <= r.score
                 ? '<i class="fa-solid fa-star pl-star-filled"></i>'
-                : '<i class="fa-regular fa-star pl-star-filled"></i>';
+                : '<i class="fa-regular fa-star pl-star-empty"></i>';
         }
 
         var avatarHtml = r.avatar_url
             ? '<img src="' + r.avatar_url + '" class="pl-review-avatar" alt="Avatar">'
-            : '<div class="pl-review-avatar-default">' + r.username.charAt(0).toUpperCase() + '</div>';
+            : '<div class="pl-review-avatar-default">' +
+                $('<div>').text(r.username.charAt(0).toUpperCase()).html() +
+              '</div>';
 
         var commentHtml = r.comment
             ? '<p class="pl-review-text">' + $('<div>').text(r.comment).html() + '</p>'
@@ -262,7 +268,9 @@ $(function () {
                 '<div class="pl-review-header">' +
                     avatarHtml +
                     '<div class="pl-review-meta">' +
-                        '<span class="pl-review-user">' + $('<div>').text(r.username).html() + '</span>' +
+                        '<span class="pl-review-user">' +
+                            $('<div>').text(r.username).html() +
+                        '</span>' +
                         '<div class="pl-review-stars">' + starsHtml + '</div>' +
                     '</div>' +
                 '</div>' +
@@ -271,7 +279,7 @@ $(function () {
         );
 
         $('.pl-no-reviews').remove();
-        $('#reviews-list').prepend($item);
+        $('#reviews-list').prepend($item.hide().fadeIn(300));
     }
 
 });
