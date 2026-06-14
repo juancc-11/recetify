@@ -49,6 +49,7 @@ $config = [
             'rules' => [
                 'sitemap.xml' => 'site/sitemap',
                 'receta/<id:\d+>'     => 'site/pre-lectura',
+                'leer/<id:\d+>'       => 'site/lectura',
             ],
         ],
       

@@ -1,0 +1,758 @@
+/* ══════════════════════════════════════════════
+   LECTURA — variables del proyecto
+══════════════════════════════════════════════ */
+:root {
+    --lc-orange:      #FD7E14;
+    --lc-orange-dark: #e06a00;
+    --lc-dark:        #343A40;
+    --lc-gray:        #6c757d;
+    --lc-light:       #f8f9fa;
+    --lc-border:      #dee2e6;
+    --lc-white:       #ffffff;
+
+    /* Tema de lectura actual (se sobreescribe via JS) */
+    --lc-read-bg:   #ffffff;
+    --lc-read-text: #343A40;
+
+    /* Tipografía / tamaño (se sobreescribe via JS) */
+    --lc-font-family: 'Nunito Sans', sans-serif;
+    --lc-font-size:   16px;
+    --lc-line-height: 1.75;
+}
+
+/* ══════════════════════════════════════════════
+   PÁGINA
+══════════════════════════════════════════════ */
+.lc-page {
+    position: relative;
+    min-height: 60vh;
+}
+
+/* ── Contenido de la receta ── */
+.lc-content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+    background: var(--lc-read-bg);
+    color: var(--lc-read-text);
+    transition: background 0.25s, color 0.25s;
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+/* ── Cuerpo de la receta ── */
+.lc-body {
+    font-family: var(--lc-font-family);
+    font-size: var(--lc-font-size);
+    line-height: var(--lc-line-height);
+}
+
+.lc-body p {
+    margin: 0 0 1em;
+}
+
+.lc-body img,
+.lc-body .editor-img-wrap img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.lc-body .editor-img-wrap {
+    display: inline-block;
+    margin: 6px 4px;
+    vertical-align: middle;
+}
+
+.lc-body .editor-img-wrap.align-left {
+    display: block;
+    margin-left: 0;
+    margin-right: auto;
+}
+.lc-body .editor-img-wrap.align-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.lc-body .editor-img-wrap.align-right {
+    display: block;
+    margin-left: auto;
+    margin-right: 0;
+}
+
+/* Resaltado de párrafo durante TTS */
+.lc-body .lc-tts-highlight {
+    background: rgba(253,126,20,0.18);
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+/* ══════════════════════════════════════════════
+   OVERLAY
+══════════════════════════════════════════════ */
+.lc-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+
+.lc-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ══════════════════════════════════════════════
+   MENÚ SUPERIOR
+══════════════════════════════════════════════ */
+.lc-menu-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--lc-white);
+    border-bottom: 2px solid var(--lc-orange);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    z-index: 1500;
+    transform: translateY(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+
+.lc-menu-top.open {
+    transform: translateY(0);
+}
+
+.lc-menu-top-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px 16px;
+}
+
+.lc-menu-recipe-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--lc-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+/* ══════════════════════════════════════════════
+   MENÚ INFERIOR
+══════════════════════════════════════════════ */
+.lc-menu-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--lc-white);
+    border-top: 2px solid var(--lc-orange);
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.10);
+    z-index: 1500;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.lc-menu-bottom.open {
+    transform: translateY(0);
+}
+
+/* ── Paneles ── */
+.lc-panel {
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    overflow-y: auto;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.lc-panel.active {
+    display: flex;
+}
+
+.lc-panel-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--lc-gray);
+    margin-bottom: -6px;
+}
+
+/* ── Botones de fila ── */
+.lc-row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 16px;
+    background: var(--lc-light);
+    border: 1.5px solid var(--lc-border);
+    border-radius: 10px;
+    color: var(--lc-dark);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+
+.lc-row-btn:hover {
+    background: var(--lc-orange);
+    color: #fff;
+    border-color: var(--lc-orange);
+}
+
+.lc-row-btn.active-state {
+    background: var(--lc-orange);
+    color: #fff;
+    border-color: var(--lc-orange);
+}
+
+.lc-row-btn-full {
+    width: 100%;
+}
+
+.lc-row-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.lc-row-danger:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+.lc-row-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.lc-row-split-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.lc-row-split-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* ── Opciones (font, tamaño, etc) ── */
+.lc-opt-btn {
+    padding: 12px 10px;
+    background: var(--lc-light);
+    border: 1.5px solid var(--lc-border);
+    border-radius: 10px;
+    color: var(--lc-dark);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+
+.lc-opt-btn:hover {
+    border-color: var(--lc-orange);
+}
+
+.lc-opt-btn.active {
+    background: var(--lc-orange);
+    color: #fff;
+    border-color: var(--lc-orange);
+}
+
+.lc-opt-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 10px;
+    background: var(--lc-white);
+    border: 1.5px solid var(--lc-border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--lc-dark);
+}
+
+/* ── Select ── */
+.lc-select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1.5px solid var(--lc-border);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--lc-dark);
+    background: var(--lc-white);
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.lc-select:focus {
+    border-color: var(--lc-orange);
+}
+
+/* ── Toggle / Switch ── */
+.lc-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--lc-dark);
+    padding: 4px 2px;
+}
+
+.lc-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.lc-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.lc-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #ced4da;
+    border-radius: 24px;
+    transition: background 0.2s;
+}
+
+.lc-switch-slider::before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+.lc-switch input:checked + .lc-switch-slider {
+    background: var(--lc-orange);
+}
+
+.lc-switch input:checked + .lc-switch-slider::before {
+    transform: translateX(20px);
+}
+
+/* ── Tema de lectura (swatches) ── */
+.lc-theme-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.lc-theme-swatch {
+    padding: 14px 6px;
+    border: 2px solid var(--lc-border);
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.18s, transform 0.1s;
+}
+
+.lc-theme-swatch:hover {
+    transform: translateY(-1px);
+}
+
+.lc-theme-swatch.active {
+    border-color: var(--lc-orange);
+    box-shadow: 0 0 0 2px rgba(253,126,20,0.25);
+}
+
+/* ══════════════════════════════════════════════
+   TABS INFERIORES
+══════════════════════════════════════════════ */
+.lc-tabs {
+    display: flex;
+    border-top: 1px solid var(--lc-border);
+    background: var(--lc-white);
+    flex-shrink: 0;
+}
+
+.lc-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px 12px;
+    background: none;
+    border: none;
+    color: var(--lc-gray);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.18s;
+}
+
+.lc-tab i {
+    font-size: 16px;
+}
+
+.lc-tab.active {
+    color: var(--lc-orange);
+}
+
+/* ══════════════════════════════════════════════
+   BOTÓN DE CIERRE FLOTANTE
+══════════════════════════════════════════════ */
+.lc-close-btn {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--lc-orange);
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(253,126,20,0.4);
+    z-index: 1600;
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s, background 0.2s;
+}
+
+.lc-close-btn.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+.lc-close-btn:hover {
+    background: var(--lc-orange-dark);
+}
+
+.lc-close-btn i {
+    transition: transform 0.25s;
+}
+
+.lc-close-btn.open i {
+    transform: rotate(180deg);
+}
+
+/* ══════════════════════════════════════════════
+   TEMAS DE LECTURA
+══════════════════════════════════════════════ */
+.lc-page[data-theme="light"] {
+    --lc-read-bg: #ffffff;
+    --lc-read-text: #343A40;
+}
+.lc-page[data-theme="cream"] {
+    --lc-read-bg: #f7f0dd;
+    --lc-read-text: #5b4a2f;
+}
+.lc-page[data-theme="sepia"] {
+    --lc-read-bg: #f4e3c1;
+    --lc-read-text: #5b3f1f;
+}
+.lc-page[data-theme="mint"] {
+    --lc-read-bg: #dff3ef;
+    --lc-read-text: #1f4a44;
+}
+.lc-page[data-theme="rose"] {
+    --lc-read-bg: #fbe2e6;
+    --lc-read-text: #6b2737;
+}
+.lc-page[data-theme="sage"] {
+    --lc-read-bg: #e3ecdc;
+    --lc-read-text: #33442b;
+}
+.lc-page[data-theme="dark"] {
+    --lc-read-bg: #222529;
+    --lc-read-text: #e4e6eb;
+}
+
+/* ══════════════════════════════════════════════
+   FUENTES
+══════════════════════════════════════════════ */
+.lc-page[data-font="nunito"] .lc-body { --lc-font-family: 'Nunito Sans', sans-serif; }
+.lc-page[data-font="roboto"] .lc-body { --lc-font-family: 'Roboto', sans-serif; }
+.lc-page[data-font="lora"]   .lc-body { --lc-font-family: 'Lora', serif; }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .lc-content {
+        padding: 18px 14px 90px;
+        border-radius: 10px;
+    }
+
+    .lc-title {
+        font-size: 20px;
+    }
+
+    .lc-cover {
+        max-height: 220px;
+    }
+
+    .lc-menu-bottom {
+        max-height: 78vh;
+    }
+
+    .lc-row-split-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+    }
+
+    .lc-opt-btn {
+        font-size: 12px;
+        padding: 10px 6px;
+    }
+
+    .lc-theme-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .lc-close-btn {
+        bottom: 12px;
+        right: 12px;
+        width: 42px;
+        height: 42px;
+    }
+}
+
+@media (max-width: 380px) {
+    .lc-title {
+        font-size: 18px;
+    }
+
+    .lc-row-split-3 {
+        grid-template-columns: 1fr;
+    }
+
+    .lc-row-split-3 .lc-opt-display {
+        order: 99;
+    }
+
+    .lc-theme-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .lc-tab span {
+        font-size: 10px;
+    }
+}
+
+/* ══════════════════════════════════════════════
+   MODAL REPORTE (independiente de mis_recetas.css)
+══════════════════════════════════════════════ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    transform: translateY(10px);
+    transition: transform 0.2s;
+    margin: 0 16px;
+    box-sizing: border-box;
+}
+
+.modal-overlay.open .modal-box {
+    transform: translateY(0);
+}
+
+.modal-box--sm {
+    max-width: 420px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--lc-gray);
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.modal-close:hover {
+    color: var(--lc-dark);
+}
+
+.modal-title {
+    margin: 0 0 18px;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--lc-dark);
+}
+
+.field-group {
+    margin-bottom: 18px;
+}
+
+.field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--lc-dark);
+    margin-bottom: 6px;
+}
+
+.field-input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--lc-border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--lc-dark);
+    background: #fff;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.field-input:focus {
+    border-color: var(--lc-orange);
+    box-shadow: 0 0 0 3px rgba(253,126,20,0.15);
+}
+
+.field-textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--lc-border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--lc-dark);
+    background: #fff;
+    box-sizing: border-box;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.field-textarea:focus {
+    border-color: var(--lc-orange);
+    box-shadow: 0 0 0 3px rgba(253,126,20,0.15);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.form-actions--center {
+    justify-content: center;
+}
+
+.btn-cancelar {
+    padding: 9px 20px;
+    background: #fff;
+    border: 1.5px solid var(--lc-border);
+    border-radius: 8px;
+    color: var(--lc-gray);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-cancelar:hover {
+    background: #f1f3f5;
+    border-color: #adb5bd;
+}
+
+.btn-subir {
+    padding: 9px 24px;
+    background: var(--lc-orange);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-subir:hover {
+    background: var(--lc-orange-dark);
+}
+
+.btn-subir:disabled {
+    background: #adb5bd;
+    cursor: not-allowed;
+}
+
+/* ══════════════════════════════════════════════
+   OCULTAR TOOLBAR FLOTANTE DE IMÁGENES EN LECTURA
+══════════════════════════════════════════════ */
+.lc-body .editor-img-wrap .img-float-toolbar,
+.lc-body .editor-img-wrap .resize-handle {
+    display: none !important;
+}
+
+.lc-body .editor-img-wrap {
+    cursor: default;
+}
+
+.lc-body .editor-img-wrap.selected {
+    outline: none;
+}
+
+@media (max-width: 768px) {
+    .modal-box {
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+
+    .modal-title {
+        font-size: 15px;
+    }
+}

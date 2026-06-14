@@ -31,12 +31,12 @@ class SiteController extends Controller
                 'class' => AccessControl::class,
                 'only' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                    'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                   'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection', 'subir-comment'],
+                   'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection', 'subir-comment', 'lectura', 'reportar-receta'],
                 'rules' => [
                     [
                         'actions' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                            'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                           'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection', 'subir-comment'],
+                           'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection', 'subir-comment', 'lectura', 'reportar-receta'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -52,6 +52,8 @@ class SiteController extends Controller
                     'subir-imagen-temp'   => ['post'],
                     'toggle-publish'      => ['post'],
                     'borrar-receta'       => ['post'],
+                    'lectura'             => ['get'],
+                    'reportar-receta'     => ['post'],
                 ],
             ],
         ];
@@ -1106,5 +1108,77 @@ public function actionSubirComment()
         ];
     }
 }
-    
+
+public function actionReportarReceta()
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+    try {
+        if (Yii::$app->user->isGuest) {
+            return ['success' => false, 'message' => 'No autenticado'];
+        }
+
+        $recipeId = (int) Yii::$app->request->post('recipe_id');
+        $motivo   = Yii::$app->request->post('motivo');
+        $desc     = trim(Yii::$app->request->post('descripcion', ''));
+
+        $validMotivos = ['contenido_inapropiado', 'spam', 'plagio', 'informacion_falsa', 'otro'];
+        if (!in_array($motivo, $validMotivos)) {
+            return ['success' => false, 'message' => 'Motivo inválido'];
+        }
+
+        $recipe = \app\models\Recipe::findOne(['id' => $recipeId]);
+        if (!$recipe) {
+            return ['success' => false, 'message' => 'Receta no encontrada'];
+        }
+
+        Yii::$app->db->createCommand()->insert('reports', [
+            'reporter_id'        => Yii::$app->user->id,
+            'reported_recipe_id' => $recipeId,
+            'reported_user_id'   => null,
+            'motivo'             => $motivo,
+            'descripcion'        => $desc ?: null,
+            'status'             => 'pendiente',
+        ])->execute();
+
+        return ['success' => true];
+
+    } catch (\Throwable $e) {
+        Yii::$app->response->statusCode = 500;
+        return ['success' => false, 'message' => 'Excepción: ' . $e->getMessage()];
+    }
+}
+
+public function actionLectura($id)
+{
+    $id = (int) $id;
+
+    $recipe = \app\models\Recipe::findOne([
+        'id'           => $id,
+        'is_published' => 1,
+        'is_deleted'   => 0,
+    ]);
+
+    if (!$recipe) {
+        throw new \yii\web\NotFoundHttpException('Receta no encontrada');
+    }
+
+    $collection = [];
+    if (!Yii::$app->user->isGuest) {
+        $userId = Yii::$app->user->id;
+        foreach (['guardado', 'favorito'] as $tipo) {
+            $collection[$tipo] = (bool) Yii::$app->db->createCommand(
+                'SELECT COUNT(*) FROM recipe_collections
+                 WHERE recipe_id = :rid AND user_id = :uid AND tipo = :tipo',
+                [':rid' => $id, ':uid' => $userId, ':tipo' => $tipo]
+            )->queryScalar();
+        }
+    }
+
+    return $this->render('lectura', [
+        'recipe'     => $recipe,
+        'collection' => $collection,
+    ]);
+}
+
 }

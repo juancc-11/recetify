@@ -133,9 +133,9 @@ $half = ($avg - $full) >= 0.5;
 
             <!-- Botones -->
             <div class="pl-actions">
-                <a href="<?= Yii::$app->urlManager->createUrl(['site/leer-receta', 'id' => $recipe->id]) ?>"
+                <a href="<?= Yii::$app->urlManager->createUrl(['site/lectura', 'id' => $recipe->id]) ?>"
                    class="pl-btn-read">
-                    <i class="fa-solid fa-book-open"></i> Leer receta
+                   <i class="fa-solid fa-book-open"></i> Leer receta
                 </a>
 
                 <div class="pl-add-wrap" id="pl-add-wrap">
