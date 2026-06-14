@@ -293,6 +293,11 @@ $(function () {
         ttsParagraphs = [];
         $('#lc-body').children().each(function () {
             var $el = $(this);
+            // Saltar elementos que sean o contengan imágenes
+            if ($el.is('img') || $el.find('img').length > 0 || $el.hasClass('editor-img-wrap')) {
+                return;
+            }
+
             var text = $el.text().trim();
             if (text) {
                 ttsParagraphs.push({ el: $el, text: text });
