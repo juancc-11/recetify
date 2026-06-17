@@ -94,18 +94,8 @@ function fetchData() {
     let tab = new URLSearchParams(window.location.search).get("tab") || "users";
     let order = filter.value;
 
-    $.get(
-    "index.php?r=admin/search-ajax",
-    {
-        tab: tab,
-        search: search,
-        order: order
-    },
-    function(data){
-        $(".grid").html(data.html);
-    },
-    "json"
-);
+
+    fetch(`index.php?r=admin/search-ajax&tab=${tab}&search=${search}&order=${order}`)
         .then(res => res.json())
         .then(data => {
             if (data.success) {
