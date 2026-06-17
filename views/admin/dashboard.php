@@ -38,17 +38,7 @@ $tab = Yii::$app->request->get('tab', 'users');
     <!-- Contenido -->
     <div class="content">
 
-        <div class="top-filters">
-
-            <select id="filter">
-                <option value="all">Todos</option>
-                <option value="recent">Más recientes</option>
-                <option value="old">Más antiguos</option>
-            </select>
-            
-
-            
-        </div>
+        
 
         <!-- USUARIOS -->
         <?php if ($tab === 'users'): ?>
