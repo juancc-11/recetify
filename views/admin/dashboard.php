@@ -79,7 +79,7 @@ $tab = Yii::$app->request->get('tab', 'users');
                                         
                                         <input type="hidden" name="report_id" value="<?= $report->id ?>">
                                         <button type="submit" class="close btn-confirm" 
-                                            data-mensaje="¿Seguro que deseas BANEAR a este usuario?"
+                                            data-mensaje="¿Seguro que deseas descartar a este usuario?"
                                             data-tipo="error">
                                             ✖
                                         </button>
@@ -119,7 +119,7 @@ $tab = Yii::$app->request->get('tab', 'users');
                                     <input type="hidden" name="id" value="<?= $report->user->id ?>">
 
                                     <button type="button" class="ban btn-confirm" 
-                                        data-mensaje="¿Seguro que deseas descartar a este usuario?"
+                                        data-mensaje="¿Seguro que deseas banea a este usuario?"
                                         data-tipo="error">
                                         Ban
                                     </button>
@@ -145,40 +145,74 @@ $tab = Yii::$app->request->get('tab', 'users');
             <div class="grid">
                 <?php foreach ($recipeReports as $report): ?>
                     <?php if ($report->recipe): ?>
-                        <div class="card">
+<div class="card">
 
-                            <div class="image"
-                                 style="background-image: url('<?= $report->recipe->imagen_portada_url ?: '/images/default_recipe.png' ?>')">
-                            </div>
+    <!-- Botón descartar -->
+    <div class="close">
+        <form method="post" action="<?= Url::to(['admin/dismiss-report']) ?>">
 
-                            <div class="info">
-                                <h4><?= Html::encode($report->recipe->titulo) ?></h4>
-                            </div>
+            <input type="hidden"
+                name="<?= Yii::$app->request->csrfParam ?>"
+                value="<?= Yii::$app->request->getCsrfToken() ?>">
 
-                            <p class="descripcion">
-                                <?= Html::encode($report->descripcion) ?>
-                            </p>
+            <input type="hidden"
+                name="report_id"
+                value="<?= $report->id ?>">
 
-                            <div class="actions">
+            <button
+                type="submit"
+                class="close btn-confirm"
+                data-mensaje="¿Seguro que deseas descartar este reporte?"
+                data-tipo="warning">
+                ✖
+            </button>
 
-                                <a href="<?= Url::to(['recipe/view', 'id' => $report->recipe->id]) ?>" class="leer">
-                                    Leer
-                                </a>
+        </form>
+    </div>
 
-                                <form method="post" action="<?= Url::to(['admin/delete-recipe']) ?>">
-                                    <input type="hidden"
-                                        name="<?= Yii::$app->request->csrfParam ?>"
-                                        value="<?= Yii::$app->request->getCsrfToken() ?>">
-                                    <input type="hidden" name="id" value="<?= $report->recipe->id ?>">
+    <div class="image"
+        style="background-image:url('<?= $report->recipe->imagen_portada_url ?: '/images/default_recipe.png' ?>')">
+    </div>
 
-                                    <button type="button" class="estado btn-confirm" 
-                                        data-mensaje="¿Seguro que deseas eliminar a esta receta?
-                                        data-tipo="error">
-                                        Eliminar
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+    <div class="info">
+        <h4><?= Html::encode($report->recipe->titulo) ?></h4>
+    </div>
+
+    <p class="descripcion">
+        <?= Html::encode($report->descripcion) ?>
+    </p>
+
+    <div class="actions">
+
+        <a href="<?= Url::to(['recipe/view', 'id' => $report->recipe->id]) ?>"
+           class="leer">
+            Leer
+        </a>
+
+        <form method="post" action="<?= Url::to(['admin/delete-recipe']) ?>">
+
+            <?= Html::hiddenInput(
+                Yii::$app->request->csrfParam,
+                Yii::$app->request->getCsrfToken()
+            ) ?>
+
+            <input type="hidden"
+                name="id"
+                value="<?= $report->recipe->id ?>">
+
+            <button
+                type="button"
+                class="estado btn-confirm"
+                data-mensaje="¿Seguro que deseas eliminar esta receta?"
+                data-tipo="error">
+                Eliminar
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </div>
