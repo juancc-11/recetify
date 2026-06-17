@@ -46,12 +46,7 @@ $tab = Yii::$app->request->get('tab', 'users');
                 <option value="old">Más antiguos</option>
             </select>
             
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Buscar..." class="search-box-input">
-                <button type="button" class="btn-search">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
-            </div>
+
             
         </div>
 
