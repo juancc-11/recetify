@@ -1,0 +1,397 @@
+/* ============================================================
+   collections.css — Recetify Lab
+   Paleta: naranja #F47B20, fondo #2a2a2a / #1e1e1e, blanco #fff
+   ============================================================ */
+
+/* ── Variables ── */
+:root {
+    --orange: #F47B20;
+    --orange-dark: #d96a10;
+    --orange-light: #fff3e8;
+    --bg-page: #e8e8e8;
+    --bg-card: #ffffff;
+    --bg-dark: #2a2a2a;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --border: #e2e2e2;
+    --border-strong: #d0d0d0;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+}
+
+/* ── Layout página ── */
+.collections-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+/* ── Tabs ── */
+.collections-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.tab-item {
+    padding: 9px 22px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-decoration: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    transition: background 0.15s, color 0.15s;
+}
+
+.tab-item:hover {
+    background: var(--orange-light);
+    color: var(--orange-dark);
+    border-color: var(--orange);
+}
+
+.tab-active {
+    background: var(--orange);
+    color: #fff;
+    border-color: var(--orange);
+}
+
+.tab-active:hover {
+    background: var(--orange-dark);
+    color: #fff;
+}
+
+/* ── Toolbar ── */
+.collections-toolbar {
+    background: #d0d0d0;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+
+.categories-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.categories-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--orange);
+    cursor: pointer;
+}
+
+/* ── Panel de categorías ── */
+.categories-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 0 4px;
+    margin-bottom: 8px;
+}
+
+.category-chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--bg-card);
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.category-chip:hover,
+.category-chip.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+}
+
+/* ── Grilla de recetas ── */
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 16px;
+}
+
+@media (max-width: 640px) {
+    .recipes-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+}
+
+@media (max-width: 420px) {
+    .recipes-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Tarjeta ── */
+.recipe-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.recipe-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+}
+
+/* Imagen */
+.card-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #4a4a4a;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.25s ease;
+}
+
+.recipe-card:hover .card-image img {
+    transform: scale(1.04);
+}
+
+/* sombra sutil al pie de la imagen para separarla del cuerpo sin un borde duro */
+.card-image::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 36px;
+    background: linear-gradient(to top, rgba(0,0,0,0.18), transparent);
+    pointer-events: none;
+}
+
+.card-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    background: linear-gradient(135deg, #515151, #454545);
+}
+
+/* Cuerpo */
+.card-body {
+    padding: 20px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.card-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.35;
+    margin: 0 0 8px 0;
+    min-height: 2.7em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Rating + meta en una sola línea */
+.card-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    min-height: 16px;
+}
+
+.star-icon {
+    color: var(--orange);
+    font-size: 14px;
+    line-height: 1;
+}
+
+.rating-value {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.meta-dot {
+    color: var(--border-strong);
+}
+
+.card-rating svg {
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.meta-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rating-empty {
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Acciones: Leer ocupa el espacio principal, Guardar es un botón icono compacto */
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 6px;
+}
+
+.btn-leer {
+    flex: 1;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 9px 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.btn-leer:hover {
+    background: var(--orange-dark);
+    color: #fff;
+}
+
+.btn-leer:active {
+    transform: scale(0.97);
+}
+
+.btn-guardar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+    padding: 0;
+}
+
+.btn-guardar:hover {
+    background: var(--orange-light);
+    border-color: var(--orange);
+    color: var(--orange-dark);
+}
+
+.btn-guardar:active {
+    transform: scale(0.92);
+}
+
+.btn-guardar.saved {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+}
+
+.btn-guardar.saved:hover {
+    background: var(--orange-dark);
+    border-color: var(--orange-dark);
+}
+
+/* ── Estado vacío ── */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 64px 24px;
+    gap: 12px;
+    color: var(--text-muted);
+}
+
+.empty-state svg {
+    color: var(--border-strong);
+}
+
+.empty-state h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.empty-state p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    max-width: 320px;
+    margin: 0;
+}
+
+.btn-explore {
+    margin-top: 8px;
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+.btn-explore:hover {
+    background: var(--orange-dark);
+    color: #fff;
+}
+
+/* ── Toast de notificación ── */
+.save-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--bg-dark);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 999;
+    white-space: nowrap;
+}
+
+.save-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
