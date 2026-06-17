@@ -1,6 +1,9 @@
 <?php
 $this->title = 'Admin Panel';
 $this->registerCssFile('@web/css/admin-dashboard.css');
+<script>
+const searchAjaxUrl = "<?= \yii\helpers\Url::to(['admin/search-ajax']) ?>";
+</script>
 $this->registerJsFile('@web/js/dashboard.js', [
     'depends' => [\yii\web\JqueryAsset::class],
     'position' => \yii\web\View::POS_END,
