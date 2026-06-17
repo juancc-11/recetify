@@ -1109,45 +1109,6 @@ public function actionSubirComment()
     }
 }
 
-public function actionReportarReceta()
-{
-    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-    try {
-        if (Yii::$app->user->isGuest) {
-            return ['success' => false, 'message' => 'No autenticado'];
-        }
-
-        $recipeId = (int) Yii::$app->request->post('recipe_id');
-        $motivo   = Yii::$app->request->post('motivo');
-        $desc     = trim(Yii::$app->request->post('descripcion', ''));
-
-        $validMotivos = ['contenido_inapropiado', 'spam', 'plagio', 'informacion_falsa', 'otro'];
-        if (!in_array($motivo, $validMotivos)) {
-            return ['success' => false, 'message' => 'Motivo inválido'];
-        }
-
-        $recipe = \app\models\Recipe::findOne(['id' => $recipeId]);
-        if (!$recipe) {
-            return ['success' => false, 'message' => 'Receta no encontrada'];
-        }
-
-        Yii::$app->db->createCommand()->insert('reports', [
-            'reporter_id'        => Yii::$app->user->id,
-            'reported_recipe_id' => $recipeId,
-            'reported_user_id'   => null,
-            'motivo'             => $motivo,
-            'descripcion'        => $desc ?: null,
-            'status'             => 'pendiente',
-        ])->execute();
-
-        return ['success' => true];
-
-    } catch (\Throwable $e) {
-        Yii::$app->response->statusCode = 500;
-        return ['success' => false, 'message' => 'Excepción: ' . $e->getMessage()];
-    }
-}
 
 public function actionLectura($id)
 {
