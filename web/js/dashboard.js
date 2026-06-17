@@ -90,16 +90,30 @@ let timeout = null;
 
 function fetchData() {
 
+    if (!input || !filter) return;
+
     let search = input.value.trim();
     let tab = new URLSearchParams(window.location.search).get("tab") || "users";
     let order = filter.value;
 
-    fetch(`${SEARCH_URL}&tab=${tab}&search=${search}&order=${order}`)
+    let url = SEARCH_URL;
+
+    // ✅ Detectar si ya tiene ?
+    if (url.includes('?')) {
+        url += `&tab=${tab}&search=${search}&order=${order}`;
+    } else {
+        url += `?tab=${tab}&search=${search}&order=${order}`;
+    }
+
+    fetch(url)
         .then(res => res.json())
         .then(data => {
             if (data.success) {
                 document.querySelector(".grid").innerHTML = data.html;
             }
+        })
+        .catch(() => {
+            console.error("Error en búsqueda AJAX");
         });
 }
 
