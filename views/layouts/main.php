@@ -209,9 +209,9 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
         <a href="#" class="rl-sidebar-item">
             <i class="fa-solid fa-clock-rotate-left"></i> Historial
         </a>
-        <a href="#" class="rl-sidebar-item">
-            <i class="fa-solid fa-bookmark"></i> Guardado
-        </a>
+        <a href="<?= Yii::$app->urlManager->createUrl(['recipe/collections', 'tab' => 'guardado']) ?>" class="rl-sidebar-item">
+    <i class="fa-solid fa-bookmark"></i> Guardados
+</a>
          <a href="<?= Yii::$app->urlManager->createUrl(['site/mis-recetas']) ?>" class="rl-sidebar-item">
             <i class="fa-solid fa-utensils"></i> Mis recetas
         </a>
