@@ -1,6 +1,8 @@
+
 <?php
 $this->title = 'Admin Panel';
 $this->registerCssFile('@web/css/admin-dashboard.css');
+
 $this->registerJsFile('@web/js/dashboard.js', [
     'depends' => [\yii\web\JqueryAsset::class],
     'position' => \yii\web\View::POS_END,
@@ -11,6 +13,10 @@ use yii\helpers\Html;
 
 $tab = Yii::$app->request->get('tab', 'users');
 ?>
+<script>
+    const TOGGLE_BAN_URL = "<?= Url::to(['admin/toggle-ban']) ?>";
+    const SEARCH_URL = "<?= Url::to(['admin/search-ajax']) ?>";
+</script>
 
 <link rel="stylesheet" href="<?= Yii::getAlias('@web/css/index.css') ?>">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -38,7 +44,22 @@ $tab = Yii::$app->request->get('tab', 'users');
     <!-- Contenido -->
     <div class="content">
 
-        
+        <div class="top-filters">
+
+            <select id="filter">
+                <option value="all">Todos</option>
+                <option value="recent">Más recientes</option>
+                <option value="old">Más antiguos</option>
+            </select>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar..." class="search-box-input">
+                <button type="button" class="btn-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+            
+        </div>
 
         <!-- USUARIOS -->
         <?php if ($tab === 'users'): ?>
@@ -169,8 +190,8 @@ $tab = Yii::$app->request->get('tab', 'users');
 
     <div class="actions">
 
-        <a href="<?= Url::to(['site/pre-lectura', 'id' => $report->recipe->id]) ?>"
-            class="leer">
+        <a href="<?= Url::to(['recipe/view', 'id' => $report->recipe->id]) ?>"
+           class="leer">
             Leer
         </a>
 
