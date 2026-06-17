@@ -1,13 +1,12 @@
 document.addEventListener("click", function (e) {
-
-    // ✅ FIX 1: usar closest (evita fallos si haces click en iconos)
-    const btn = e.target.closest(".btn-ban-toggle");
-
-    if (btn) {
+    // 1. Manejo de Toggle Ban (Fetch / AJAX)
+    if (e.target.classList.contains("btn-ban-toggle")) {
+        const btn = e.target;
         const id = btn.dataset.id;
-        const action = btn.dataset.action;
+        const action = btn.dataset.action; // Supongo que aquí viene 'ban' o 'unban'
         const card = btn.closest(".card");
 
+        // Personalizamos el mensaje según la acción
         const titulo = action === 'ban' ? '¿Bloquear usuario?' : '¿Desbloquear usuario?';
         const color = action === 'ban' ? '#d33' : '#2ecc71';
 
@@ -23,9 +22,8 @@ document.addEventListener("click", function (e) {
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
-
-                // ✅ FIX 2: usar ruta absoluta
-                fetch("/index.php?r=admin/toggle-ban", {
+                // Si el usuario confirma, ejecutamos el fetch
+                fetch(TOGGLE_BAN_URL, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
@@ -36,7 +34,7 @@ document.addEventListener("click", function (e) {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-
+                        // 🎬 Animación y feedback
                         Swal.fire({
                             title: '¡Listo!',
                             text: 'El estado del usuario ha sido actualizado.',
@@ -45,30 +43,25 @@ document.addEventListener("click", function (e) {
                             showConfirmButton: false
                         });
 
-                        if (card) {
-                            card.style.transition = "0.3s";
-                            card.style.opacity = "0";
-                            card.style.transform = "scale(0.8)";
-                            setTimeout(() => card.remove(), 300);
-                        }
-
+                        card.style.transition = "0.3s";
+                        card.style.opacity = "0";
+                        card.style.transform = "scale(0.8)";
+                        setTimeout(() => card.remove(), 300);
                     } else {
                         Swal.fire('Error', 'No se pudo procesar la solicitud.', 'error');
                     }
                 })
-                .catch(() => {
+                .catch(error => {
                     Swal.fire('Error de red', 'Hubo un problema con la conexión.', 'error');
                 });
             }
         });
     }
 
-    // ✅ confirmación formularios
+    // 2. Manejo de Botones de Confirmación (Formularios Normales)
     const botonConfirm = e.target.closest('.btn-confirm');
-
     if (botonConfirm) {
         e.preventDefault();
-
         const mensaje = botonConfirm.getAttribute('data-mensaje') || '¿Estás seguro?';
         const tipoIcono = botonConfirm.getAttribute('data-tipo') || 'question';
 
@@ -90,9 +83,6 @@ document.addEventListener("click", function (e) {
     }
 });
 
-
-// ✅ FIX 3: evitar error si no existen elementos
-
 const input = document.getElementById("searchInput");
 const filter = document.getElementById("filter");
 
@@ -100,13 +90,11 @@ let timeout = null;
 
 function fetchData() {
 
-    if (!input || !filter) return;
-
     let search = input.value.trim();
     let tab = new URLSearchParams(window.location.search).get("tab") || "users";
     let order = filter.value;
 
-    fetch(`/index.php?r=admin/search-ajax&tab=${tab}&search=${search}&order=${order}`)
+    fetch(`${SEARCH_URL}&tab=${tab}&search=${search}&order=${order}`)
         .then(res => res.json())
         .then(data => {
             if (data.success) {
@@ -115,22 +103,13 @@ function fetchData() {
         });
 }
 
-// ✅ eventos seguros
-if (input) {
-    input.addEventListener("input", () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(fetchData, 300);
-    });
-}
+input.addEventListener("input", () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(fetchData, 300);
+});
 
-if (filter) {
-    filter.addEventListener("change", fetchData);
-}
+filter.addEventListener("change", fetchData);
 
-// ✅ botón búsqueda protegido
-const btnSearch = document.querySelector(".btn-search");
-if (btnSearch) {
-    btnSearch.addEventListener("click", function (e) {
-        e.preventDefault();
-    });
-}
+document.querySelector(".btn-search").addEventListener("click", function (e) {
+    e.preventDefault();
+});
