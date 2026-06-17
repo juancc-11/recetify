@@ -184,8 +184,8 @@ $tab = Yii::$app->request->get('tab', 'users');
 
     <div class="actions">
 
-        <a href="<?= Url::to(['recipe/view', 'id' => $report->recipe->id]) ?>"
-           class="leer">
+        <a href="<?= Url::to(['site/pre-lectura', 'id' => $report->recipe->id]) ?>"
+            class="leer">
             Leer
         </a>
 
