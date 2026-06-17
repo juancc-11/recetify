@@ -115,9 +115,12 @@ $this->registerJsFile('@web/js/collections.js', ['position' => \yii\web\View::PO
                         <div class="card-actions">
 
                             <a
-                                href="<?= Url::to(['recipe/view', 'id' => $recipe['id']]) ?>"
+                                href="<?= Url::to([
+                                                  'site/pre-lectura',
+                                                  'id' => $recipe['id']
+                                                  ]) ?>"
                                 class="btn-leer"
-                            >
+                                >
                                 Leer receta
                             </a>
 
@@ -163,7 +166,7 @@ $this->registerJsFile('@web/js/collections.js', ['position' => \yii\web\View::PO
                 <p>Agrega recetas a favoritos para verlas aquí.</p>
             <?php endif; ?>
 
-            <a href="<?= Url::to(['recipe/index']) ?>" class="btn-explore">
+            <a href="<?= Yii::$app->urlManager->createUrl(['recipe/search']) ?>" class="btn-explore">
                 Explorar recetas
             </a>
 
