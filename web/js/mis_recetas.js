@@ -523,7 +523,9 @@ $(function () {
     function loadEditorContent($editor, content) {
         if (!content) { $editor.empty(); return; }
 
-        if (content.indexOf('editor-img-wrap') !== -1) {
+        var isHtml = /<[a-z][\s\S]*>/i.test(content);
+
+        if (isHtml) {
             $editor.html(content);
         } else {
             const html = '<p>' + content
