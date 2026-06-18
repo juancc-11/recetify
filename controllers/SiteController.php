@@ -471,11 +471,12 @@ class SiteController extends Controller
 
      /* ── ESTADÍSTICAS DE UNA RECETA ─────────────────────────────── */
     public function actionRecipeStats()
-    {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
+    try {
         if (Yii::$app->user->isGuest) {
-            return ['error' => true];
+            return ['error' => true, 'message' => 'No autenticado'];
         }
 
         $recipeId = (int) Yii::$app->request->get('recipe_id');
@@ -486,54 +487,58 @@ class SiteController extends Controller
             ->one();
 
         if (!$recipe) {
-            return ['error' => true];
+            return ['error' => true, 'message' => 'Receta no encontrada'];
         }
 
-        $visitas = Yii::$app->db->createCommand('
-            SELECT DATE_FORMAT(view_date, "%d/%m") AS fecha, SUM(views) AS total
-            FROM recipe_views
-            WHERE recipe_id = :id
-              AND view_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-            GROUP BY view_date
-            ORDER BY view_date ASC
-        ', [':id' => $recipeId])->queryAll();
+        // Visitas últimos 30 días
+       $visitas = Yii::$app->db->createCommand(
+       "SELECT DATE_FORMAT(view_date, '%d/%m') AS fecha, SUM(views) AS total
+        FROM recipe_views
+        WHERE recipe_id = " . (int)$recipeId . "
+        AND view_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        GROUP BY view_date
+        ORDER BY view_date ASC"
+        )->queryAll();
 
-        $totalVisitas = Yii::$app->db->createCommand(
-            'SELECT COALESCE(SUM(views),0) FROM recipe_views WHERE recipe_id = :id',
+        // Totales
+        $totalVisitas = (int) Yii::$app->db->createCommand(
+            'SELECT COALESCE(SUM(views), 0) FROM recipe_views WHERE recipe_id = :id',
             [':id' => $recipeId]
         )->queryScalar();
 
-        $totalComentarios = \app\models\Comment::find()
-            ->where(['recipe_id' => $recipeId])->count();
-
-        $totalGuardados = Yii::$app->db->createCommand(
-            "SELECT COUNT(*) FROM recipe_collections WHERE recipe_id = :id AND tipo='guardado'",
-            [':id' => $recipeId]
-        )->queryScalar();
-
-        $totalFavoritos = Yii::$app->db->createCommand(
-            "SELECT COUNT(*) FROM recipe_collections WHERE recipe_id = :id AND tipo='favorito'",
-            [':id' => $recipeId]
-        )->queryScalar();
-
-        $totalHistorial = Yii::$app->db->createCommand(
-            "SELECT COUNT(*) FROM recipe_collections WHERE recipe_id = :id AND tipo='historial'",
-            [':id' => $recipeId]
-        )->queryScalar();
-
-        $avgActual = \app\models\Comment::find()
+        $totalComentarios = (int) \app\models\Comment::find()
             ->where(['recipe_id' => $recipeId])
-            ->average('score') ?? 0;
+            ->count();
 
-        $posicion = (int) Yii::$app->db->createCommand('
-            SELECT COUNT(*) + 1
-            FROM (
-                SELECT recipe_id, AVG(score) AS avg_score
-                FROM comments
-                GROUP BY recipe_id
-            ) AS ranks
-            WHERE avg_score > :avg
-        ', [':avg' => $avgActual])->queryScalar();
+        $totalGuardados = (int) Yii::$app->db->createCommand(
+            "SELECT COUNT(*) FROM recipe_collections WHERE recipe_id = :id AND tipo = 'guardado'",
+            [':id' => $recipeId]
+        )->queryScalar();
+
+        $totalFavoritos = (int) Yii::$app->db->createCommand(
+            "SELECT COUNT(*) FROM recipe_collections WHERE recipe_id = :id AND tipo = 'favorito'",
+            [':id' => $recipeId]
+        )->queryScalar();
+
+        $totalHistorial = (int) Yii::$app->db->createCommand(
+            "SELECT COUNT(*) FROM recipe_collections WHERE recipe_id = :id AND tipo = 'historial'",
+            [':id' => $recipeId]
+        )->queryScalar();
+
+        // Promedio actual de esta receta
+        $avgActual = (float) (\app\models\Comment::find()
+            ->where(['recipe_id' => $recipeId])
+            ->average('score') ?? 0);
+
+        // Posición en ranking — evitar subconsulta con alias problemático
+        $allAvgs = Yii::$app->db->createCommand('
+            SELECT AVG(score) AS avg_score
+            FROM comments
+            GROUP BY recipe_id
+            HAVING AVG(score) > :avg
+        ', [':avg' => $avgActual])->queryColumn();
+
+        $posicion = count($allAvgs) + 1;
 
         $totalRecetas = (int) \app\models\Recipe::find()
             ->where(['is_published' => 1, 'is_deleted' => 0])
@@ -542,18 +547,28 @@ class SiteController extends Controller
         return [
             'visitas' => $visitas,
             'totales' => [
-                'visitas'     => (int) $totalVisitas,
-                'comentarios' => (int) $totalComentarios,
-                'guardados'   => (int) $totalGuardados,
-                'favoritos'   => (int) $totalFavoritos,
-                'historial'   => (int) $totalHistorial,
+                'visitas'     => $totalVisitas,
+                'comentarios' => $totalComentarios,
+                'guardados'   => $totalGuardados,
+                'favoritos'   => $totalFavoritos,
+                'historial'   => $totalHistorial,
             ],
             'ranking' => [
                 'posicion' => $posicion,
                 'total'    => $totalRecetas,
             ],
         ];
+
+    } catch (\Throwable $e) {
+        Yii::$app->response->statusCode = 500;
+        return [
+            'error'   => true,
+            'message' => 'Excepción: ' . $e->getMessage(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+        ];
     }
+}
 
     /* ══════════════════════════════════════════════════════
        OBTENER RECETA PARA EDITAR
