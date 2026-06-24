@@ -1,0 +1,360 @@
+/* ==========================================================
+   Chef Líderes — chef-lideres.css
+   Paleta: naranja #F97316 / blanco / gris claro
+   Coincide con la identidad visual de Recetify Lab
+   ========================================================== */
+
+/* ── Variables ─────────────────────────────────────────── */
+:root {
+    --cl-orange:        #F97316;
+    --cl-orange-dark:   #EA6C0A;
+    --cl-orange-light:  #FFF7ED;
+    --cl-border:        #E5E7EB;
+    --cl-text:          #1F2937;
+    --cl-text-muted:    #6B7280;
+    --cl-bg:            #F9FAFB;
+    --cl-white:         #FFFFFF;
+    --cl-radius:        12px;
+    --cl-shadow:        0 2px 12px rgba(0,0,0,.08);
+    --cl-transition:    .3s ease;
+}
+
+/* ── Página ─────────────────────────────────────────────── */
+.chef-lideres-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.cl-page-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.cl-page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--cl-text);
+    margin-bottom: 6px;
+}
+
+.cl-trophy-icon {
+    font-size: 1.8rem;
+}
+
+.cl-page-subtitle {
+    color: var(--cl-text-muted);
+    font-size: .95rem;
+}
+
+/* ── Sección ────────────────────────────────────────────── */
+.cl-seccion {
+    margin-bottom: 40px;
+}
+
+.cl-seccion-header {
+    margin-bottom: 12px;
+}
+
+.cl-seccion-titulo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--cl-text);
+    margin-bottom: 2px;
+}
+
+.cl-seccion-subtitulo {
+    font-size: .82rem;
+    color: var(--cl-text-muted);
+}
+
+/* ── Card outer (borde gris igual al wireframe) ─────────── */
+.cl-card-outer {
+    border: 1px solid var(--cl-border);
+    border-radius: var(--cl-radius);
+    background: var(--cl-white);
+    overflow: hidden;
+    box-shadow: var(--cl-shadow);
+}
+
+/* ── Carrusel ───────────────────────────────────────────── */
+.cl-carousel {
+    position: relative;
+    overflow: hidden;
+}
+
+.cl-carousel-track {
+    display: flex;
+    transition: transform var(--cl-transition);
+    will-change: transform;
+}
+
+/* ── Card ───────────────────────────────────────────────── */
+.cl-card {
+    min-width: 100%;          /* 1 card visible a la vez */
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Imagen de la receta */
+.cl-card-img-wrap {
+    position: relative;
+    flex-shrink: 0;
+    width: 130px;
+    height: 110px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--cl-bg);
+    margin-right: 16px;
+}
+
+.cl-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.cl-card-medalla {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    font-size: 1.3rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.3));
+}
+
+/* Cuerpo */
+.cl-card-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Chef info */
+.cl-card-chef {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cl-card-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--cl-orange);
+    flex-shrink: 0;
+}
+
+.cl-card-chef-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.cl-card-chef-nombre {
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--cl-text);
+}
+
+.cl-card-chef-user {
+    font-size: .78rem;
+    color: var(--cl-text-muted);
+}
+
+/* Receta destacada */
+.cl-card-receta-titulo {
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--cl-text);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cl-card-receta-desc {
+    font-size: .8rem;
+    color: var(--cl-text-muted);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Métricas */
+.cl-card-metricas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.cl-metrica {
+    font-size: .78rem;
+    color: var(--cl-text-muted);
+    background: var(--cl-bg);
+    border: 1px solid var(--cl-border);
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+.cl-metrica--highlight {
+    background: var(--cl-orange-light);
+    border-color: var(--cl-orange);
+    color: var(--cl-orange-dark);
+    font-weight: 600;
+}
+
+/* Botones */
+.cl-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.cl-btn {
+    display: inline-block;
+    padding: 7px 18px;
+    border-radius: 6px;
+    font-size: .82rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--cl-transition), color var(--cl-transition);
+    white-space: nowrap;
+}
+
+.cl-btn--primary {
+    background: var(--cl-orange);
+    color: var(--cl-white);
+    border: 2px solid var(--cl-orange);
+}
+
+.cl-btn--primary:hover {
+    background: var(--cl-orange-dark);
+    border-color: var(--cl-orange-dark);
+    color: var(--cl-white);
+    text-decoration: none;
+}
+
+.cl-btn--outline {
+    background: transparent;
+    color: var(--cl-orange);
+    border: 2px solid var(--cl-orange);
+}
+
+.cl-btn--outline:hover {
+    background: var(--cl-orange-light);
+    color: var(--cl-orange-dark);
+    text-decoration: none;
+}
+
+/* ── Botones prev/next del carrusel ─────────────────────── */
+.cl-carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: var(--cl-white);
+    border: 1px solid var(--cl-border);
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--cl-shadow);
+    color: var(--cl-orange);
+    transition: background var(--cl-transition), color var(--cl-transition);
+    padding: 0;
+}
+
+.cl-carousel-btn:hover {
+    background: var(--cl-orange);
+    color: var(--cl-white);
+}
+
+.cl-carousel-prev { left: 6px; }
+.cl-carousel-next { right: 6px; }
+
+/* ── Dots ───────────────────────────────────────────────── */
+.cl-carousel-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+}
+
+.cl-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    background: var(--cl-border);
+    cursor: pointer;
+    padding: 0;
+    transition: background var(--cl-transition), transform var(--cl-transition);
+}
+
+.cl-dot--active {
+    background: var(--cl-orange);
+    transform: scale(1.25);
+}
+
+/* ── Estado vacío ───────────────────────────────────────── */
+.cl-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--cl-text-muted);
+}
+
+.cl-empty-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 520px) {
+    .cl-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .cl-card-img-wrap {
+        width: 100%;
+        height: 150px;
+        margin-right: 0;
+        margin-bottom: 12px;
+    }
+
+    .cl-card-chef {
+        justify-content: center;
+    }
+
+    .cl-card-metricas {
+        justify-content: center;
+    }
+
+    .cl-card-actions {
+        justify-content: center;
+    }
+
+    .cl-carousel-btn {
+        display: none; /* en móvil se usa swipe */
+    }
+}
