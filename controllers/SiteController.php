@@ -1179,6 +1179,18 @@ public function actionLectura($id)
                 [':rid' => $id, ':uid' => $userId, ':tipo' => $tipo]
             )->queryScalar();
         }
+
+        // ── Registrar en historial ──────────────────────────────────
+    $db  = Yii::$app->db;
+    $now = date('Y-m-d H:i:s');
+
+    $db->createCommand(
+    'INSERT INTO recipe_collections (user_id, recipe_id, tipo, created_at, updated_at)
+     VALUES (:uid, :rid, :tipo, :now, :now)
+     ON DUPLICATE KEY UPDATE updated_at = :now',
+    [':uid' => $userId, ':rid' => $id, ':tipo' => 'historial', ':now' => $now]
+    )->execute();
+// ────────────────────────────────────────────────────────────
     }
 
     return $this->render('lectura', [
