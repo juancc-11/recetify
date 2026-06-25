@@ -31,12 +31,14 @@ class SiteController extends Controller
                 'class' => AccessControl::class,
                 'only' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                    'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                   'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection', 'subir-comment', 'lectura', 'reportar-receta'],
+                   'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection',
+                    'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read'],
                 'rules' => [
                     [
                         'actions' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                            'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                           'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection', 'subir-comment', 'lectura', 'reportar-receta'],
+                           'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection',
+                            'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -137,6 +139,34 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
+
+    public function actionMarkRead()
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    if (Yii::$app->user->isGuest) return ['success' => false];
+
+    $messageId = (int) Yii::$app->request->post('message_id');
+    $updated = Yii::$app->db->createCommand(
+        'UPDATE messages SET is_read = 1
+         WHERE id = :id AND receiver_id = :uid',
+        [':id' => $messageId, ':uid' => Yii::$app->user->id]
+    )->execute();
+
+    return ['success' => $updated > 0];
+}
+
+public function actionMarkAllRead()
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    if (Yii::$app->user->isGuest) return ['success' => false];
+
+    Yii::$app->db->createCommand(
+        'UPDATE messages SET is_read = 1 WHERE receiver_id = :uid',
+        [':uid' => Yii::$app->user->id]
+    )->execute();
+
+    return ['success' => true];
+}
 
     public function actionProfile()
     {
