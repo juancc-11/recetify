@@ -188,17 +188,26 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
             <div id="rl-config-menu" class="rl-config-menu rl-hidden">
                 <p class="rl-menu-title">Configuración</p>
 
-                <a href="<?= Yii::$app->urlManager->createUrl(['site/about']) ?>">
-                    <i class="fa-solid fa-circle-info"></i> Nosotros
-                </a>
-
                 <?php if (!Yii::$app->user->isGuest): ?>
                 <a href="<?= Yii::$app->urlManager->createUrl(['site/profile']) ?>">
                     <i class="fa-solid fa-user-pen"></i> Editar perfil
                 </a>
+                
+                <a href="<?= Yii::$app->urlManager->createUrl(['site/about']) ?>">
+                    <i class="fa-solid fa-circle-info"></i> Nosotros
+                </a>
+
+                
                 <?php endif; ?>
 
                 <div class="rl-config-divider"></div>
+
+                <a href="<?= Yii::$app->urlManager->createUrl(['site/privacy']) ?>">
+                <i class="fa-solid fa-shield-halved"></i> Privacidad
+                </a>
+                <a href="<?= Yii::$app->urlManager->createUrl(['site/terms']) ?>">
+                <i class="fa-solid fa-file-lines"></i> Términos de uso
+                </a>
 
                 <div class="rl-config-row">
                     <span><i class="fa-solid fa-moon"></i> Tema oscuro</span>
@@ -210,14 +219,9 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
 
                 <div class="rl-config-divider"></div>
 
-                <?php if (!Yii::$app->user->isGuest): ?>
-                <form method="post" action="<?= Yii::$app->urlManager->createUrl(['site/logout']) ?>">
-                    <?= Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->csrfToken) ?>
-                    <button type="submit" class="rl-menu-btn" style="color:#dc3545;">
-                        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-                    </button>
-                </form>
-                <?php endif; ?>
+                <p style="margin:8px 8px 2px;font-size:11px;color:#adb5bd;text-align:center;">
+                  Recetify Lab v1.0
+                </p>
             </div>
         </div>
 
