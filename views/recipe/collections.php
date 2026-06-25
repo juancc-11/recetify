@@ -20,6 +20,7 @@ $this->registerJsFile('@web/js/collections.js', ['position' => \yii\web\View::PO
 ?>
 
 <div class="collections-page">
+    <div class="collections-page tab-<?= Html::encode($activeTab) ?>">
 
     <!-- TABS -->
     <div class="collections-tabs">
