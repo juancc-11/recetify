@@ -1,18 +1,20 @@
 document.addEventListener("click", function (e) {
-    // 1. Manejo de Toggle Ban (Fetch / AJAX)
-    if (e.target.classList.contains("btn-ban-toggle")) {
-        const btn = e.target;
-        const id = btn.dataset.id;
-        const action = btn.dataset.action; // Supongo que aquí viene 'ban' o 'unban'
-        const card = btn.closest(".card");
 
-        // Personalizamos el mensaje según la acción
+    // ══════════════════════════════════════════════════════
+    // 1. Toggle Ban (AJAX)
+    // ══════════════════════════════════════════════════════
+    if (e.target.classList.contains("btn-ban-toggle")) {
+        const btn    = e.target;
+        const id     = btn.dataset.id;
+        const action = btn.dataset.action;
+        const card   = btn.closest(".card");
+
         const titulo = action === 'ban' ? '¿Bloquear usuario?' : '¿Desbloquear usuario?';
-        const color = action === 'ban' ? '#d33' : '#2ecc71';
+        const color  = action === 'ban' ? '#d33' : '#2ecc71';
 
         Swal.fire({
             title: titulo,
-            text: `¿Estás seguro de que deseas realizar esta acción?`,
+            text: '¿Estás seguro de que deseas realizar esta acción?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: color,
@@ -21,49 +23,70 @@ document.addEventListener("click", function (e) {
             cancelButtonText: 'Cancelar',
             reverseButtons: true
         }).then((result) => {
-            if (result.isConfirmed) {
-                // Si el usuario confirma, ejecutamos el fetch
-                fetch(TOGGLE_BAN_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                        "X-CSRF-Token": yii.getCsrfToken()
-                    },
-                    body: `id=${id}&action=${action}`
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        // 🎬 Animación y feedback
-                        Swal.fire({
-                            title: '¡Listo!',
-                            text: 'El estado del usuario ha sido actualizado.',
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
+            if (!result.isConfirmed) return;
 
-                        card.style.transition = "0.3s";
-                        card.style.opacity = "0";
-                        card.style.transform = "scale(0.8)";
-                        setTimeout(() => card.remove(), 300);
-                    } else {
-                        Swal.fire('Error', 'No se pudo procesar la solicitud.', 'error');
-                    }
-                })
-                .catch(error => {
-                    Swal.fire('Error de red', 'Hubo un problema con la conexión.', 'error');
-                });
-            }
+            // Animación de carga
+            Swal.fire({
+                title: 'Procesando...',
+                text: action === 'ban' ? 'Baneando usuario...' : 'Desbaneando usuario...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            fetch(TOGGLE_BAN_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-Token": yii.getCsrfToken()
+                },
+                body: `id=${id}&action=${action}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: '¡Listo!',
+                        text: 'El estado del usuario ha sido actualizado.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    card.style.transition  = "0.3s";
+                    card.style.opacity     = "0";
+                    card.style.transform   = "scale(0.8)";
+                    setTimeout(() => card.remove(), 300);
+                } else {
+                    Swal.fire('Error', 'No se pudo procesar la solicitud.', 'error');
+                }
+            })
+            .catch(() => {
+                Swal.fire('Error de red', 'Hubo un problema con la conexión.', 'error');
+            });
         });
+
+        return;
     }
 
-    // 2. Manejo de Botones de Confirmación (Formularios Normales)
+    // ══════════════════════════════════════════════════════
+    // 2. Botones de confirmación (formularios normales)
+    //    kick / ban / delete-recipe / dismiss-report
+    // ══════════════════════════════════════════════════════
     const botonConfirm = e.target.closest('.btn-confirm');
     if (botonConfirm) {
         e.preventDefault();
-        const mensaje = botonConfirm.getAttribute('data-mensaje') || '¿Estás seguro?';
-        const tipoIcono = botonConfirm.getAttribute('data-tipo') || 'question';
+
+        const mensaje   = botonConfirm.getAttribute('data-mensaje') || '¿Estás seguro?';
+        const tipoIcono = botonConfirm.getAttribute('data-tipo')    || 'question';
+        const form      = botonConfirm.closest('form');
+
+        // Detectar qué acción es para personalizar el mensaje de carga
+        const action = form ? form.action : '';
+        let loadingText = 'Procesando...';
+        if (action.includes('kick'))           loadingText = 'Enviando advertencia...';
+        else if (action.includes('ban'))       loadingText = 'Baneando usuario...';
+        else if (action.includes('delete'))    loadingText = 'Eliminando receta...';
+        else if (action.includes('dismiss'))   loadingText = 'Descartando reporte...';
 
         Swal.fire({
             title: 'Confirmar acción',
@@ -76,54 +99,95 @@ document.addEventListener("click", function (e) {
             cancelButtonText: 'Cancelar',
             reverseButtons: true
         }).then((result) => {
-            if (result.isConfirmed) {
-                botonConfirm.closest('form').submit();
-            }
+            if (!result.isConfirmed) return;
+
+            // Animación de carga antes de enviar el form
+            Swal.fire({
+                title: loadingText,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // Pequeño delay para que se vea el loading antes del submit
+            setTimeout(() => {
+                if (form) form.submit();
+            }, 600);
         });
+
+        return;
     }
 });
 
-const input = document.getElementById("searchInput");
+// ══════════════════════════════════════════════════════
+// 3. Búsqueda AJAX con animación de carga en el grid
+// ══════════════════════════════════════════════════════
+const input  = document.getElementById("searchInput");
 const filter = document.getElementById("filter");
 
 let timeout = null;
 
-function fetchData() {
+function showGridLoading() {
+    const grid = document.querySelector(".grid");
+    if (!grid) return;
+    grid.style.opacity    = "0.4";
+    grid.style.pointerEvents = "none";
+}
 
+function hideGridLoading() {
+    const grid = document.querySelector(".grid");
+    if (!grid) return;
+    grid.style.opacity    = "1";
+    grid.style.pointerEvents = "auto";
+}
+
+function fetchData() {
     if (!input || !filter) return;
 
-    let search = input.value.trim();
-    let tab = new URLSearchParams(window.location.search).get("tab") || "users";
-    let order = filter.value;
+    const search = input.value.trim();
+    const tab    = new URLSearchParams(window.location.search).get("tab") || "users";
+    const order  = filter.value;
 
     let url = SEARCH_URL;
+    url += url.includes('?')
+        ? `&tab=${tab}&search=${encodeURIComponent(search)}&order=${order}`
+        : `?tab=${tab}&search=${encodeURIComponent(search)}&order=${order}`;
 
-    // ✅ Detectar si ya tiene ?
-    if (url.includes('?')) {
-        url += `&tab=${tab}&search=${search}&order=${order}`;
-    } else {
-        url += `?tab=${tab}&search=${search}&order=${order}`;
-    }
+    showGridLoading();
 
     fetch(url)
         .then(res => res.json())
         .then(data => {
+            hideGridLoading();
             if (data.success) {
-                document.querySelector(".grid").innerHTML = data.html;
+                const grid = document.querySelector(".grid");
+                if (grid) {
+                    grid.style.transition = "opacity 0.2s";
+                    grid.innerHTML        = data.html;
+                }
             }
         })
         .catch(() => {
+            hideGridLoading();
             console.error("Error en búsqueda AJAX");
         });
 }
 
-input.addEventListener("input", () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(fetchData, 300);
-});
+if (input) {
+    input.addEventListener("input", () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(fetchData, 300);
+    });
+}
 
-filter.addEventListener("change", fetchData);
+if (filter) {
+    filter.addEventListener("change", fetchData);
+}
 
-document.querySelector(".btn-search").addEventListener("click", function (e) {
-    e.preventDefault();
-});
+const btnSearch = document.querySelector(".btn-search");
+if (btnSearch) {
+    btnSearch.addEventListener("click", function (e) {
+        e.preventDefault();
+        fetchData();
+    });
+}

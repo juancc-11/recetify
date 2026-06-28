@@ -64,7 +64,9 @@
     color: #fff;
 }
 
-/* ── Toolbar ── */
+/* ══════════════════════════════════════════════════════
+   TOOLBAR — buscador + filtros de orden
+   ══════════════════════════════════════════════════════ */
 .collections-toolbar {
     background: #d0d0d0;
     border-radius: var(--radius-sm);
@@ -72,50 +74,110 @@
     margin-bottom: 12px;
 }
 
-.categories-toggle {
+.toolbar-form {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Buscador */
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 160px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-input:focus {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(244, 123, 32, 0.12);
+}
+
+/* Botones de filtro */
+.filter-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 13px;
+    border-radius: var(--radius-sm);
     font-size: 13px;
     font-weight: 500;
-    color: var(--text-primary);
-    cursor: pointer;
-    user-select: none;
-}
-
-.categories-toggle input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--orange);
-    cursor: pointer;
-}
-
-/* ── Panel de categorías ── */
-.categories-panel {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px 0 4px;
-    margin-bottom: 8px;
-}
-
-.category-chip {
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
+    color: var(--text-secondary);
     background: var(--bg-card);
     border: 1px solid var(--border-strong);
-    color: var(--text-secondary);
-    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
     transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.category-chip:hover,
-.category-chip.active {
-    background: var(--orange);
+.filter-btn:hover {
+    background: var(--orange-light);
+    color: var(--orange-dark);
     border-color: var(--orange);
+}
+
+.filter-btn--active {
+    background: var(--orange);
     color: #fff;
+    border-color: var(--orange);
+}
+
+.filter-btn--active:hover {
+    background: var(--orange-dark);
+    border-color: var(--orange-dark);
+    color: #fff;
+}
+
+.filter-btn--clear {
+    color: #e03e3e;
+    border-color: #e03e3e;
+    background: #fff5f5;
+}
+
+.filter-btn--clear:hover {
+    background: #e03e3e;
+    color: #fff;
+    border-color: #e03e3e;
+}
+
+/* ── Contador de resultados ── */
+.results-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 4px 2px;
 }
 
 /* ── Grilla de recetas ── */
@@ -172,7 +234,6 @@
     transform: scale(1.04);
 }
 
-/* sombra sutil al pie de la imagen para separarla del cuerpo sin un borde duro */
 .card-image::after {
     content: "";
     position: absolute;
@@ -255,7 +316,7 @@
     color: var(--text-muted);
 }
 
-/* Acciones: Leer ocupa el espacio principal, Guardar es un botón icono compacto */
+/* Acciones */
 .card-actions {
     display: flex;
     align-items: center;
@@ -394,4 +455,208 @@
 .save-toast.visible {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+}
+
+.tab-historial .btn-guardar {
+    display: none;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+/* ---------- Tablets (1024px) ---------- */
+@media (max-width: 1024px) {
+
+    .collections-page {
+        max-width: 100%;
+        padding: 20px 16px 40px;
+    }
+
+    .recipes-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+}
+
+/* ---------- Tablets pequeñas (768px) ---------- */
+@media (max-width: 768px) {
+
+    .collections-page {
+        padding: 16px;
+    }
+
+    /* Tabs */
+    .collections-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        gap: 8px;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+    }
+
+    .collections-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab-item {
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 10px 18px;
+    }
+
+    /* Toolbar */
+    .collections-toolbar {
+        padding: 10px 12px;
+    }
+
+    .toolbar-form {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .search-box {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .filter-buttons {
+        gap: 6px;
+    }
+
+    .filter-btn {
+        flex: 1;
+        justify-content: center;
+        font-size: 12.5px;
+        padding: 7px 8px;
+    }
+
+    /* Tarjetas */
+    .recipes-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .card-body {
+        padding: 16px 12px;
+    }
+
+    .card-title {
+        font-size: 14px;
+        min-height: auto;
+    }
+
+    .btn-leer {
+        padding: 10px;
+    }
+
+}
+
+/* ---------- Celulares grandes (576px) ---------- */
+@media (max-width: 576px) {
+
+    .collections-page {
+        padding: 14px;
+    }
+
+    .toolbar-form {
+        gap: 8px;
+    }
+
+    .filter-btn {
+        font-size: 12px;
+        padding: 6px 8px;
+    }
+
+    .recipes-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .recipe-card {
+        max-width: 420px;
+        margin: auto;
+        width: 100%;
+    }
+
+    .card-image {
+        aspect-ratio: 16 / 9;
+    }
+
+    .card-title {
+        font-size: 15px;
+    }
+
+    .card-rating {
+        font-size: 13px;
+    }
+
+    .card-actions {
+        gap: 10px;
+    }
+
+    .btn-leer {
+        font-size: 14px;
+        padding: 11px;
+    }
+
+    .btn-guardar {
+        width: 42px;
+        height: 42px;
+    }
+
+}
+
+/* ---------- Celulares pequeños (400px) ---------- */
+@media (max-width: 400px) {
+
+    .collections-page {
+        padding: 10px;
+    }
+
+    .collections-toolbar {
+        padding: 10px;
+    }
+
+    .filter-btn {
+        font-size: 11.5px;
+        padding: 6px 6px;
+        gap: 3px;
+    }
+
+    .filter-btn svg {
+        display: none;
+    }
+
+    .card-body {
+        padding: 14px 10px;
+    }
+
+    .card-title {
+        font-size: 14px;
+    }
+
+    .btn-leer {
+        font-size: 13px;
+    }
+
+    .btn-guardar {
+        width: 38px;
+        height: 38px;
+    }
+
+    .save-toast {
+        width: calc(100% - 20px);
+        left: 10px;
+        right: 10px;
+        transform: translateY(12px);
+        text-align: center;
+    }
+
+    .save-toast.visible {
+        transform: translateY(0);
+    }
+
 }

@@ -16,75 +16,72 @@ class RecipeController extends Controller
 
     public function actionSearch($q = '', $filter = 'all')
     {
-        $userId = Yii::$app->user->id; // null si es invitado
+        $userId = Yii::$app->user->id;
 
         $queryBuilder = (new Query())
-->select([
-    'recipes.id',
-    'recipes.user_id',
-    'recipes.titulo',
-    'recipes.descripcion',
-    'recipes.imagen_portada_url',
-    'recipes.created_at',
-    'users.username',
-    'users.avatar_url',
+            ->select([
+                'recipes.id',
+                'recipes.user_id',
+                'recipes.titulo',
+                'recipes.descripcion',
+                'recipes.imagen_portada_url',
+                'recipes.created_at',
+                'users.username',
+                'users.avatar_url',
+                'avg_score'     => new Expression('AVG(comments.score)'),
+                'total_ratings' => new Expression('COUNT(DISTINCT comments.id)'),
+                'total_views'   => new Expression(
+                    '(SELECT COALESCE(SUM(rv.views),0)
+                      FROM recipe_views rv
+                      WHERE rv.recipe_id = recipes.id)'
+                ),
+            ])
+            ->from('recipes')
+            ->leftJoin('users',       'users.id = recipes.user_id')
+            ->leftJoin('comments',    'comments.recipe_id = recipes.id AND comments.is_visible = 1')
+            ->leftJoin('recipe_tags', 'recipe_tags.recipe_id = recipes.id')
+            ->leftJoin('tags',        'tags.id = recipe_tags.tag_id')
+            ->where([
+                'recipes.is_published' => 1,
+                'recipes.is_deleted'   => 0,
+            ])
+            ->groupBy([
+                'recipes.id',
+                'recipes.user_id',
+                'recipes.titulo',
+                'recipes.descripcion',
+                'recipes.imagen_portada_url',
+                'recipes.created_at',
+                'users.username',
+                'users.avatar_url',
+            ]);
 
-    'avg_score' => new Expression('AVG(comments.score)'),
-
-    'total_ratings' => new Expression('COUNT(DISTINCT comments.id)'),
-
-    'total_views' => new Expression(
-        '(SELECT COALESCE(SUM(rv.views),0)
-          FROM recipe_views rv
-          WHERE rv.recipe_id = recipes.id)'
-    ),
-])
-    ->from('recipes')
-    ->leftJoin('users',    'users.id = recipes.user_id')
-    ->leftJoin('comments', 'comments.recipe_id = recipes.id AND comments.is_visible = 1')
-    ->where([
-        'recipes.is_published' => 1,
-        'recipes.is_deleted'   => 0,
-    ])
-    ->groupBy([
-        'recipes.id',
-        'recipes.user_id',
-        'recipes.titulo',
-        'recipes.descripcion',
-        'recipes.imagen_portada_url',
-        'recipes.created_at',
-        'users.username',
-        'users.avatar_url',
-    ]);
-
-        // BUSCADOR
+        // BUSCADOR (texto + tags)
         if (!empty($q)) {
             $queryBuilder->andWhere([
                 'or',
                 ['like', 'recipes.titulo',       $q],
                 ['like', 'recipes.descripcion',  $q],
-                ['like', 'recipes.receta_texto',  $q],
+                ['like', 'recipes.receta_texto', $q],
+                ['like', 'tags.name',            $q],
+                ['like', 'tags.slug',            $q],
             ]);
         }
 
-        // FILTROS
+        // ORDENAMIENTO
         switch ($filter) {
-
             case 'popular':
                 $queryBuilder->orderBy([
                     'avg_score'     => SORT_DESC,
                     'total_ratings' => SORT_DESC,
                 ]);
                 break;
-
             case 'recent':
                 $queryBuilder->orderBy(['recipes.created_at' => SORT_DESC]);
                 break;
-
             case 'favorites':
                 $queryBuilder->orderBy(['recipes.id' => SORT_ASC]);
                 break;
-
             default:
                 $queryBuilder->orderBy(['recipes.created_at' => SORT_DESC]);
                 break;
@@ -92,15 +89,13 @@ class RecipeController extends Controller
 
         $recipes = $queryBuilder->all();
 
-        // ----------------------------------------------------
         // Marcar cuáles recetas ya tiene guardadas el usuario
-        // ----------------------------------------------------
         $savedIds = [];
 
         if ($userId && !empty($recipes)) {
             $recipeIds = array_column($recipes, 'id');
 
-            $savedIds = (new Query())
+            $savedIds = array_map('intval', (new Query())
                 ->select('recipe_id')
                 ->from('recipe_collections')
                 ->where([
@@ -108,10 +103,7 @@ class RecipeController extends Controller
                     'tipo'      => 'guardado',
                     'recipe_id' => $recipeIds,
                 ])
-                ->column();
-
-            // column() devuelve strings desde la BD; normalizamos a int para comparar bien
-            $savedIds = array_map('intval', $savedIds);
+                ->column());
         }
 
         foreach ($recipes as &$recipe) {
@@ -130,9 +122,8 @@ class RecipeController extends Controller
     // actionCollections — Guardados / Historial / Favoritos
     // =========================================================
 
-    public function actionCollections($tab = 'guardado')
+    public function actionCollections($tab = 'guardado', $q = '', $filter = 'recent')
     {
-        // Redirigir si no está autenticado
         if (Yii::$app->user->isGuest) {
             return $this->redirect(['site/login']);
         }
@@ -144,26 +135,25 @@ class RecipeController extends Controller
 
         $userId = Yii::$app->user->id;
 
-        $recipes = (new Query())
+        $queryBuilder = (new Query())
             ->select([
                 'recipes.id',
                 'recipes.titulo',
                 'recipes.imagen_portada_url',
                 'users.username',
                 'users.avatar_url',
-                'avg_score'    => new Expression('AVG(comments.score)'),
+                'avg_score'     => new Expression('AVG(comments.score)'),
                 'total_ratings' => new Expression('COUNT(DISTINCT comments.id)'),
-                'total_views' => new Expression(
-    '(SELECT COALESCE(SUM(rv.views),0)
-      FROM recipe_views rv
-      WHERE rv.recipe_id = recipes.id)'
-),
+                'total_views'   => new Expression(
+                    '(SELECT COALESCE(SUM(rv.views),0)
+                      FROM recipe_views rv
+                      WHERE rv.recipe_id = recipes.id)'
+                ),
             ])
             ->from('recipe_collections')
-            ->innerJoin('recipes',      'recipes.id = recipe_collections.recipe_id AND recipes.is_published = 1 AND recipes.is_deleted = 0')
-            ->innerJoin('users',        'users.id = recipes.user_id')
-            ->leftJoin('comments',      'comments.recipe_id = recipes.id AND comments.is_visible = 1')
-            
+            ->innerJoin('recipes',  'recipes.id = recipe_collections.recipe_id AND recipes.is_published = 1 AND recipes.is_deleted = 0')
+            ->innerJoin('users',    'users.id = recipes.user_id')
+            ->leftJoin('comments',  'comments.recipe_id = recipes.id AND comments.is_visible = 1')
             ->where([
                 'recipe_collections.user_id' => $userId,
                 'recipe_collections.tipo'    => $tab,
@@ -174,13 +164,42 @@ class RecipeController extends Controller
                 'recipes.imagen_portada_url',
                 'users.username',
                 'users.avatar_url',
-            ])
-            ->orderBy(['recipe_collections.created_at' => SORT_DESC])
-            ->all();
+                'recipe_collections.created_at',
+            ]);
+
+        // BUSCADOR dentro de la colección
+        if (!empty($q)) {
+            $queryBuilder->andWhere([
+                'or',
+                ['like', 'recipes.titulo',      $q],
+                ['like', 'recipes.descripcion', $q],
+            ]);
+        }
+
+        // ORDENAMIENTO
+        switch ($filter) {
+            case 'popular':
+                $queryBuilder->orderBy([
+                    'avg_score'     => SORT_DESC,
+                    'total_ratings' => SORT_DESC,
+                ]);
+                break;
+            case 'az':
+                $queryBuilder->orderBy(['recipes.titulo' => SORT_ASC]);
+                break;
+            case 'recent':
+            default:
+                $queryBuilder->orderBy(['recipe_collections.created_at' => SORT_DESC]);
+                break;
+        }
+
+        $recipes = $queryBuilder->all();
 
         return $this->render('collections', [
             'recipes'   => $recipes,
             'activeTab' => $tab,
+            'q'         => $q,
+            'filter'    => $filter,
         ]);
     }
 
@@ -192,12 +211,10 @@ class RecipeController extends Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        // Solo POST
         if (!Yii::$app->request->isPost) {
             return ['success' => false, 'message' => 'Método no permitido.'];
         }
 
-        // Solo usuarios autenticados
         if (Yii::$app->user->isGuest) {
             return ['success' => false, 'message' => 'Debes iniciar sesión.'];
         }

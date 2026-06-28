@@ -1232,6 +1232,18 @@ public function actionLectura($id)
                 [':rid' => $id, ':uid' => $userId, ':tipo' => $tipo]
             )->queryScalar();
         }
+
+        // ── Registrar en historial ──────────────────────────────────
+    $db  = Yii::$app->db;
+    $now = date('Y-m-d H:i:s');
+
+    $db->createCommand(
+    'INSERT INTO recipe_collections (user_id, recipe_id, tipo, created_at, updated_at)
+     VALUES (:uid, :rid, :tipo, :now, :now)
+     ON DUPLICATE KEY UPDATE updated_at = :now',
+    [':uid' => $userId, ':rid' => $id, ':tipo' => 'historial', ':now' => $now]
+    )->execute();
+// ────────────────────────────────────────────────────────────
     }
 
     return $this->render('lectura', [
@@ -1240,68 +1252,104 @@ public function actionLectura($id)
     ]);
 }
 
-    public function actionReportarReceta()
-{
-    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+public function actionReportarReceta()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-    try {
-        if (Yii::$app->user->isGuest) {
-            return ['success' => false, 'message' => 'No autenticado'];
-        }
-
-        $recipeId = (int) Yii::$app->request->post('recipe_id', 0);
-        $userId   = (int) Yii::$app->request->post('user_id', 0);
-        $motivo   = Yii::$app->request->post('motivo');
-        $desc     = trim(Yii::$app->request->post('descripcion', ''));
-
-        // Debe venir exactamente uno de los dos: recipe_id o user_id
-        if (!$recipeId && !$userId) {
-            return ['success' => false, 'message' => 'Falta especificar receta o usuario a reportar'];
-        }
-        if ($recipeId && $userId) {
-            return ['success' => false, 'message' => 'No se puede reportar receta y usuario a la vez'];
-        }
-
-        $validMotivos = ['contenido_inapropiado', 'spam', 'plagio', 'informacion_falsa', 'acoso', 'otro'];
-        if (!in_array($motivo, $validMotivos)) {
-            return ['success' => false, 'message' => 'Motivo inválido'];
-        }
-
-        $reportedRecipeId = null;
-        $reportedUserId   = null;
-
-        if ($recipeId) {
-            $recipe = \app\models\Recipe::findOne(['id' => $recipeId]);
-            if (!$recipe) {
-                return ['success' => false, 'message' => 'Receta no encontrada'];
+        try {
+            if (Yii::$app->user->isGuest) {
+                return ['success' => false, 'message' => 'No autenticado'];
             }
-            $reportedRecipeId = $recipeId;
-        } else {
-            $user = \app\models\User::findOne(['id' => $userId]);
-            if (!$user) {
-                return ['success' => false, 'message' => 'Usuario no encontrado'];
+
+            $recipeId = (int) Yii::$app->request->post('recipe_id', 0);
+            $userId   = (int) Yii::$app->request->post('user_id', 0);
+            $motivo   = Yii::$app->request->post('motivo');
+            $desc     = trim(Yii::$app->request->post('descripcion', ''));
+
+            // Debe venir exactamente uno de los dos: recipe_id o user_id
+            if (!$recipeId && !$userId) {
+                return ['success' => false, 'message' => 'Falta especificar receta o usuario a reportar'];
             }
-            if ($userId === (int) Yii::$app->user->id) {
-                return ['success' => false, 'message' => 'No puedes reportarte a ti mismo'];
+            if ($recipeId && $userId) {
+                return ['success' => false, 'message' => 'No se puede reportar receta y usuario a la vez'];
             }
-            $reportedUserId = $userId;
+
+            $validMotivos = ['contenido_inapropiado', 'spam', 'plagio', 'informacion_falsa', 'acoso', 'otro'];
+            if (!in_array($motivo, $validMotivos)) {
+                return ['success' => false, 'message' => 'Motivo inválido'];
+            }
+
+            $reportedRecipeId = null;
+            $reportedUserId   = null;
+
+            if ($recipeId) {
+                $recipe = \app\models\Recipe::findOne(['id' => $recipeId]);
+                if (!$recipe) {
+                    return ['success' => false, 'message' => 'Receta no encontrada'];
+                }
+                $reportedRecipeId = $recipeId;
+            } else {
+                $user = \app\models\User::findOne(['id' => $userId]);
+                if (!$user) {
+                    return ['success' => false, 'message' => 'Usuario no encontrado'];
+                }
+                if ($userId === (int) Yii::$app->user->id) {
+                    return ['success' => false, 'message' => 'No puedes reportarte a ti mismo'];
+                }
+                $reportedUserId = $userId;
+            }
+
+            // Guardar reporte
+            Yii::$app->db->createCommand()->insert('reports', [
+                'reporter_id'        => Yii::$app->user->id,
+                'reported_recipe_id' => $reportedRecipeId,
+                'reported_user_id'   => $reportedUserId,
+                'motivo'             => $motivo,
+                'descripcion'        => $desc ?: null,
+                'status'             => 'pendiente',
+            ])->execute();
+
+            // ── Notificar a todos los admins activos ──────────────────
+            $admins = \app\models\User::find()
+                ->select(['id'])
+                ->where(['rol' => 'admin', 'is_active' => 1])
+                ->asArray()
+                ->all();
+
+            if ($reportedRecipeId) {
+                $asunto = 'Nueva receta reportada';
+                $cuerpo = 'La receta #' . $reportedRecipeId
+                        . ' ha recibido un nuevo reporte con motivo "'  . $motivo . '".'
+                        . ' Revísala en el panel de administración.';
+            } else {
+                $asunto = 'Nuevo usuario reportado';
+                $cuerpo = 'El usuario #' . $reportedUserId
+                        . ' ha recibido un nuevo reporte con motivo "' . $motivo . '".'
+                        . ' Revísalo en el panel de administración.';
+            }
+
+            $now = date('Y-m-d H:i:s');
+
+            foreach ($admins as $admin) {
+                Yii::$app->db->createCommand()->insert('messages', [
+                    'receiver_id' => $admin['id'],
+                    'sender_id'   => null,          // mensaje del sistema
+                    'tipo'        => 'notificacion',
+                    'asunto'      => $asunto,
+                    'cuerpo'      => $cuerpo,
+                    'is_read'     => 0,
+                    'created_at'  => $now,
+                    'updated_at'  => $now,
+                ])->execute();
+            }
+            // ─────────────────────────────────────────────────────────
+
+            return ['success' => true];
+
+        } catch (\Throwable $e) {
+            Yii::$app->response->statusCode = 500;
+            return ['success' => false, 'message' => 'Excepción: ' . $e->getMessage()];
         }
-
-        Yii::$app->db->createCommand()->insert('reports', [
-            'reporter_id'        => Yii::$app->user->id,
-            'reported_recipe_id' => $reportedRecipeId,
-            'reported_user_id'   => $reportedUserId,
-            'motivo'             => $motivo,
-            'descripcion'        => $desc ?: null,
-            'status'             => 'pendiente',
-        ])->execute();
-
-        return ['success' => true];
-
-    } catch (\Throwable $e) {
-        Yii::$app->response->statusCode = 500;
-        return ['success' => false, 'message' => 'Excepción: ' . $e->getMessage()];
     }
-}
 
 }

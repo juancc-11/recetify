@@ -248,3 +248,240 @@ body {
         padding: 10px 16px !important;
     }
 }
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+/* Pantallas grandes */
+@media (max-width:1200px){
+
+    .login-card{
+        width:460px;
+        padding:36px;
+    }
+
+}
+
+/* Tablets */
+@media (max-width:992px){
+
+    .login-container{
+        padding:20px;
+    }
+
+    .login-card{
+        width:420px;
+        max-width:100%;
+        padding:34px 30px;
+        box-sizing:border-box;
+    }
+
+    .logo img{
+        width:46px;
+    }
+
+    .logo h2{
+        font-size:22px;
+    }
+
+    .logo h3{
+        font-size:18px;
+    }
+
+    .field label{
+        font-size:17px;
+    }
+
+}
+
+/* Tablets pequeñas */
+@media (max-width:768px){
+
+    .login-container{
+
+        height:auto;
+        min-height:100vh;
+        padding:25px 16px;
+        align-items:center;
+
+    }
+
+    .login-card{
+
+        width:100%;
+        max-width:480px;
+        padding:28px 22px;
+        border-radius:12px;
+        box-sizing:border-box;
+
+    }
+
+    .logo img{
+
+        width:42px;
+
+    }
+
+    .logo h2{
+
+        font-size:20px;
+
+    }
+
+    .logo h3{
+
+        font-size:16px;
+
+    }
+
+    .field{
+
+        margin-bottom:18px;
+
+    }
+
+    .field label{
+
+        font-size:15px;
+
+    }
+
+    .input,
+    .login-card input{
+
+        height:44px !important;
+        font-size:16px !important;
+        padding:10px !important;
+        box-sizing:border-box !important;
+
+    }
+
+    .buttons{
+
+        flex-direction:column;
+        gap:12px;
+
+    }
+
+    .btn,
+    .login-card .btn{
+
+        width:100% !important;
+        padding:12px !important;
+        font-size:15px !important;
+
+    }
+
+    .lg-register-link{
+
+        font-size:14px;
+
+    }
+
+}
+
+/* Celulares */
+@media (max-width:576px){
+
+    .login-container{
+
+        padding:18px 12px;
+
+    }
+
+    .login-card{
+
+        padding:24px 18px;
+
+    }
+
+    .logo img{
+
+        width:38px;
+
+    }
+
+    .logo h2{
+
+        font-size:18px;
+
+    }
+
+    .logo h3{
+
+        font-size:15px;
+
+    }
+
+    .field label{
+
+        font-size:14px;
+
+    }
+
+    .input,
+    .login-card input{
+
+        height:42px !important;
+
+    }
+
+    .lg-register-link{
+
+        font-size:13px;
+        line-height:1.5;
+
+    }
+
+}
+
+/* Celulares muy pequeños */
+@media (max-width:380px){
+
+    .login-container{
+
+        padding:12px 8px;
+
+    }
+
+    .login-card{
+
+        padding:20px 14px;
+        border-radius:10px;
+
+    }
+
+    .logo img{
+
+        width:34px;
+
+    }
+
+    .logo h2{
+
+        font-size:16px;
+
+    }
+
+    .logo h3{
+
+        font-size:14px;
+
+    }
+
+    .field label{
+
+        font-size:13px;
+
+    }
+
+    .btn,
+    .login-card .btn{
+
+        font-size:14px !important;
+        padding:10px !important;
+
+    }
+
+}

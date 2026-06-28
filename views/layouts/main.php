@@ -294,7 +294,7 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
         <a href="<?= Yii::$app->urlManager->createUrl(['site/index']) ?>" class="rl-sidebar-item">
             <i class="fa-solid fa-house"></i> Home
         </a>
-        <a href="#" class="rl-sidebar-item">
+        <a href="<?= Yii::$app->urlManager->createUrl(['recipe/collections', 'tab' => 'historial']) ?>" class="rl-sidebar-item">
             <i class="fa-solid fa-clock-rotate-left"></i> Historial
         </a>
         <a href="<?= Yii::$app->urlManager->createUrl(['recipe/collections', 'tab' => 'guardado']) ?>" class="rl-sidebar-item">
@@ -315,7 +315,7 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
             <i class="fa-solid fa-trophy"></i> Ranking de recetas
         </a>
         <a href="<?= Yii::$app->urlManager->createUrl(['chef-lideres/index']) ?>" class="rl-sidebar-item">
-            <i class="fa-solid fa-hat-chef"></i> Chefs líderes
+            <i class="fa-solid fa-person"></i> Chefs líderes
         </a>
     </div>
 
