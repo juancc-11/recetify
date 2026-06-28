@@ -50,6 +50,8 @@ $config = [
                 'sitemap.xml' => 'site/sitemap',
                 'receta/<id:\d+>'     => 'site/pre-lectura',
                 'leer/<id:\d+>'       => 'site/lectura',
+                'perfil/<id:\d+>' => 'site/mi-perfil',
+                'mi-perfil'       => 'site/mi-perfil',
             ],
         ],
       

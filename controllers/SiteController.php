@@ -32,13 +32,13 @@ class SiteController extends Controller
                 'only' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                    'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
                    'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection',
-                    'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read'],
+                    'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read', 'mi-perfil', 'guardar-bio'],
                 'rules' => [
                     [
                         'actions' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                            'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
                            'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection',
-                            'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read'],
+                            'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read', 'mi-perfil', 'guardar-bio'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -286,6 +286,59 @@ public function actionMarkAllRead()
             'model' => $model,
         ]);
     }
+
+    public function actionMiPerfil($id = null)
+{
+    // Si no hay id, mostrar el propio perfil
+    if ($id === null) {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['site/login']);
+        }
+        $id = Yii::$app->user->id;
+    }
+
+    $profileUser = \app\models\User::findOne((int) $id);
+    if (!$profileUser || !$profileUser->is_active) {
+        throw new \yii\web\NotFoundHttpException('Usuario no encontrado');
+    }
+
+    $isOwner = !Yii::$app->user->isGuest && (int) Yii::$app->user->id === (int) $profileUser->id;
+
+    // Reseñas que ha dado el usuario
+    $reviews = \app\models\Comment::find()
+        ->where(['user_id' => $profileUser->id, 'is_visible' => 1])
+        ->orderBy(['created_at' => SORT_DESC])
+        ->all();
+
+    // Recetas publicadas del usuario
+    $recipes = \app\models\Recipe::find()
+        ->where(['user_id' => $profileUser->id, 'is_published' => 1, 'is_deleted' => 0])
+        ->orderBy(['created_at' => SORT_DESC])
+        ->all();
+
+    return $this->render('mi_perfil', [
+        'profileUser' => $profileUser,
+        'reviews'     => $reviews,
+        'recipes'     => $recipes,
+        'isOwner'     => $isOwner,
+    ]);
+}
+
+public function actionGuardarBio()
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    if (Yii::$app->user->isGuest) return ['success' => false];
+
+    $bio  = trim(Yii::$app->request->post('bio', ''));
+    $user = \app\models\User::findOne(Yii::$app->user->id);
+    if (!$user) return ['success' => false];
+
+    $user->full_name = mb_substr($bio, 0, 300);
+    if ($user->save(false)) {
+        return ['success' => true, 'bio' => $user->full_name];
+    }
+    return ['success' => false];
+}
 
     public function actionMisRecetas()
     {

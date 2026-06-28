@@ -1,0 +1,591 @@
+/* ══════════════════════════════════════════════
+   MI PERFIL
+══════════════════════════════════════════════ */
+:root {
+    --pf-orange:      #FD7E14;
+    --pf-orange-dark: #e06a00;
+    --pf-dark:        #343A40;
+    --pf-gray:        #6c757d;
+    --pf-light:       #f8f9fa;
+    --pf-border:      #dee2e6;
+    --pf-white:       #ffffff;
+    --pf-radius:      14px;
+    --pf-shadow:      0 2px 12px rgba(0,0,0,0.07);
+}
+
+.pf-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 16px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ── HERO ── */
+.pf-hero {
+    position: relative;
+    margin-bottom: 0;
+}
+
+.pf-hero-banner {
+    height: 160px;
+    background: linear-gradient(135deg, #2e3338 0%, #3b4147 40%, #FD7E14 100%);
+    border-radius: var(--pf-radius) var(--pf-radius) 0 0;
+}
+
+.pf-hero-body {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 0 24px 16px;
+    background: var(--pf-white);
+    border: 1px solid var(--pf-border);
+    border-top: none;
+    min-height: 70px;
+}
+
+.pf-avatar-wrap {
+    position: absolute;
+    left: 24px;
+    bottom: 0;
+    transform: translateY(50%);
+}
+
+.pf-avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--pf-white);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    background: var(--pf-light);
+}
+
+.pf-avatar-default {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: var(--pf-orange);
+    color: var(--pf-white);
+    font-size: 42px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid var(--pf-white);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* Stats en el hero */
+.pf-stats-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.pf-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.pf-stat-val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--pf-dark);
+    line-height: 1;
+}
+
+.pf-stat-label {
+    font-size: 11px;
+    color: var(--pf-gray);
+    text-align: center;
+}
+
+.pf-stat-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--pf-border);
+}
+
+/* ── INFO SECTION ── */
+.pf-info-section {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 72px 24px 24px;
+    background: var(--pf-white);
+    border: 1px solid var(--pf-border);
+    border-top: none;
+    border-radius: 0 0 var(--pf-radius) var(--pf-radius);
+    margin-bottom: 20px;
+}
+
+.pf-info-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.pf-username {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--pf-dark);
+}
+
+.pf-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.pf-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--pf-gray);
+}
+
+.pf-meta-item i { color: var(--pf-orange); }
+
+.pf-badge-admin {
+    background: rgba(253,126,20,0.1);
+    color: var(--pf-orange);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+/* Bio */
+.pf-bio-wrap { margin-top: 4px; }
+
+.pf-bio-display {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pf-bio-text {
+    margin: 0;
+    font-size: 14px;
+    color: var(--pf-dark);
+    line-height: 1.6;
+    flex: 1;
+}
+
+.pf-bio-empty { color: var(--pf-gray); font-style: italic; }
+
+.pf-bio-edit-btn {
+    background: none;
+    border: 1px solid var(--pf-border);
+    border-radius: 6px;
+    color: var(--pf-gray);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.pf-bio-edit-btn:hover {
+    background: var(--pf-orange);
+    color: var(--pf-white);
+    border-color: var(--pf-orange);
+}
+
+.pf-bio-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pf-bio-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--pf-border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--pf-dark);
+    background: var(--pf-white);
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.pf-bio-textarea:focus {
+    border-color: var(--pf-orange);
+    box-shadow: 0 0 0 3px rgba(253,126,20,0.12);
+}
+
+.pf-bio-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.pf-bio-counter {
+    font-size: 12px;
+    color: var(--pf-gray);
+    margin-right: auto;
+}
+
+.pf-bio-cancel {
+    padding: 7px 16px;
+    background: var(--pf-white);
+    border: 1.5px solid var(--pf-border);
+    border-radius: 8px;
+    color: var(--pf-gray);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pf-bio-cancel:hover { background: var(--pf-light); }
+
+.pf-bio-save {
+    padding: 7px 20px;
+    background: var(--pf-orange);
+    border: none;
+    border-radius: 8px;
+    color: var(--pf-white);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.pf-bio-save:hover { background: var(--pf-orange-dark); }
+
+/* Botón editar perfil */
+.pf-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    background: var(--pf-white);
+    border: 1.5px solid var(--pf-orange);
+    border-radius: 8px;
+    color: var(--pf-orange);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+}
+
+.pf-edit-btn:hover {
+    background: var(--pf-orange);
+    color: var(--pf-white);
+}
+
+/* ── TABS ── */
+.pf-tabs-wrap {
+    background: var(--pf-white);
+    border-radius: var(--pf-radius);
+    border: 1px solid var(--pf-border);
+    box-shadow: var(--pf-shadow);
+    overflow: hidden;
+}
+
+.pf-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--pf-border);
+}
+
+.pf-tab {
+    flex: 1;
+    padding: 14px 20px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pf-gray);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s;
+}
+
+.pf-tab:hover { color: var(--pf-dark); }
+
+.pf-tab.active {
+    color: var(--pf-orange);
+    border-bottom-color: var(--pf-orange);
+}
+
+.pf-tab-panel {
+    display: none;
+    padding: 24px;
+}
+
+.pf-tab-panel.active { display: block; }
+
+/* Empty state */
+.pf-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--pf-gray);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.pf-empty i { font-size: 32px; color: var(--pf-border); }
+.pf-empty p { margin: 0; font-size: 14px; }
+
+/* ── RESEÑAS DADAS ── */
+.pf-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pf-review-card {
+    background: var(--pf-light);
+    border: 1px solid var(--pf-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.pf-review-recipe {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--pf-white);
+    border-bottom: 1px solid var(--pf-border);
+    text-decoration: none;
+    transition: background 0.15s;
+}
+
+.pf-review-recipe:hover { background: #fff8f2; }
+
+.pf-review-recipe-img {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--pf-border);
+}
+
+.pf-review-no-img {
+    width: 52px;
+    height: 52px;
+    border-radius: 8px;
+    background: var(--pf-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pf-border);
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.pf-review-recipe-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.pf-review-recipe-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--pf-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pf-review-recipe-author {
+    font-size: 12px;
+    color: var(--pf-gray);
+}
+
+.pf-review-content {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pf-review-stars {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.pf-star { color: #f59e0b; font-size: 13px; }
+
+.pf-review-score {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f59e0b;
+    margin-left: 4px;
+}
+
+.pf-review-body {
+    margin: 0;
+    font-size: 14px;
+    color: var(--pf-dark);
+    line-height: 1.6;
+}
+
+.pf-review-date {
+    font-size: 12px;
+    color: var(--pf-gray);
+}
+
+/* ── GRID DE RECETAS ── */
+.pf-recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.pf-recipe-card {
+    background: var(--pf-white);
+    border: 1px solid var(--pf-border);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+}
+
+.pf-recipe-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+    transform: translateY(-2px);
+}
+
+.pf-recipe-img-wrap {
+    width: 100%;
+    height: 150px;
+    overflow: hidden;
+}
+
+.pf-recipe-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s;
+}
+
+.pf-recipe-card:hover .pf-recipe-img {
+    transform: scale(1.04);
+}
+
+.pf-recipe-no-img {
+    width: 100%;
+    height: 100%;
+    background: var(--pf-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: var(--pf-border);
+}
+
+.pf-recipe-info {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.pf-recipe-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--pf-dark);
+    line-height: 1.3;
+}
+
+.pf-recipe-desc {
+    margin: 0;
+    font-size: 12px;
+    color: var(--pf-gray);
+    line-height: 1.5;
+}
+
+.pf-recipe-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.pf-recipe-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #f59e0b;
+}
+
+.pf-recipe-rating-count {
+    color: var(--pf-gray);
+    font-weight: 400;
+    font-size: 12px;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .pf-page { padding: 0 10px 36px; }
+
+    .pf-hero-banner { height: 120px; }
+
+    .pf-avatar { width: 86px; height: 86px; }
+    .pf-avatar-default { width: 86px; height: 86px; font-size: 32px; }
+
+    .pf-stats-row { gap: 12px; }
+    .pf-stat-val { font-size: 16px; }
+
+    .pf-info-section {
+        flex-direction: column;
+        padding: 60px 16px 18px;
+        gap: 12px;
+    }
+
+    .pf-edit-btn { width: 100%; justify-content: center; }
+
+    .pf-username { font-size: 20px; }
+
+    .pf-tab { font-size: 13px; padding: 12px 10px; }
+    .pf-tab-panel { padding: 16px 14px; }
+
+    .pf-recipes-grid { grid-template-columns: 1fr; }
+
+    .pf-review-recipe-img,
+    .pf-review-no-img { width: 44px; height: 44px; }
+}
+
+@media (max-width: 380px) {
+    .pf-hero-banner { height: 100px; }
+    .pf-avatar { width: 72px; height: 72px; }
+    .pf-avatar-default { width: 72px; height: 72px; font-size: 26px; }
+    .pf-username { font-size: 18px; }
+    .pf-stat-val { font-size: 14px; }
+    .pf-tab { font-size: 12px; padding: 10px 6px; }
+}

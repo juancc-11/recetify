@@ -244,8 +244,8 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
                  class="rl-menu-avatar" alt="Avatar">
             <p><?= Html::encode(Yii::$app->user->identity->username) ?></p>
         </div>
-        <a href="<?= Yii::$app->urlManager->createUrl(['site/profile']) ?>">
-            <i class="fa-solid fa-user"></i> Perfil
+        <a href="<?= Yii::$app->urlManager->createUrl(['site/mi-perfil']) ?>">
+            <i class="fa-solid fa-user"></i> Mi Perfil
         </a>
         <?php if (Yii::$app->user->identity->rol === 'admin'): ?>
             <a href="<?= Yii::$app->urlManager->createUrl(['admin/dashboard']) ?>">

@@ -236,37 +236,33 @@ $this->registerJs("
                         <div class="recipe-meta">
 
                             <!-- FOTO PERFIL -->
-                            <div class="author-profile">
+<div class="author-profile">
 
-                                <?php if (!empty($recipe['avatar_url'])): ?>
+    <?php if (!empty($recipe['avatar_url'])): ?>
+        <a href="<?= Url::to(['/site/mi-perfil', 'id' => $recipe['user_id']]) ?>">
+            <img
+                src="<?= Html::encode($recipe['avatar_url']) ?>"
+                alt="Avatar"
+                class="author-avatar"
+            >
+        </a>
+    <?php else: ?>
+        <a href="<?= Url::to(['/site/mi-perfil', 'id' => $recipe['user_id']]) ?>">
+            <div class="default-avatar">
+                <?= strtoupper(substr($recipe['username'], 0, 1)) ?>
+            </div>
+        </a>
+    <?php endif; ?>
 
-                                    <img
-                                        src="<?= Html::encode($recipe['avatar_url']) ?>"
-                                        alt="Avatar"
-                                        class="author-avatar"
-                                    >
+    <div class="author-info">
+        <a href="<?= Url::to(['/site/mi-perfil', 'id' => $recipe['user_id']]) ?>"
+           class="author-name">
+            <?= Html::encode($recipe['username']) ?>
+        </a>
+        <small class="author-role">Autor de receta</small>
+    </div>
 
-                                <?php else: ?>
-
-                                    <div class="default-avatar">
-                                        <?= strtoupper(substr($recipe['username'], 0, 1)) ?>
-                                    </div>
-
-                                <?php endif; ?>
-
-                                <div class="author-info">
-
-                                    <span class="author-name">
-                                        <?= Html::encode($recipe['username']) ?>
-                                    </span>
-
-                                    <small class="author-role">
-                                        Autor de receta
-                                    </small>
-
-                                </div>
-
-                            </div>
+</div>
 
                             <!-- CALIFICACIÓN -->
                             <?php

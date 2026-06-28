@@ -80,14 +80,14 @@ $metricaLabel = $metrica === 'score'
 
         <!-- Botones -->
         <div class="cl-card-actions">
-            <a href="<?= \yii\helpers\Url::to(['/site/index', 'user' => $chef['user_id']]) ?>"
-               class="cl-btn cl-btn--primary">
-                Ver perfil
-            </a>
-            <a href="<?= \yii\helpers\Url::to(['/recipe/index', 'user_id' => $chef['user_id']]) ?>"
-               class="cl-btn cl-btn--outline">
-                Sus recetas
-            </a>
+            <a href="<?= \yii\helpers\Url::to(['/site/mi-perfil', 'id' => $chef['user_id']]) ?>"
+            class="cl-btn cl-btn--primary">
+           Ver perfil
+        </a>
+        <a href="<?= \yii\helpers\Url::to(['/site/mi-perfil', 'id' => $chef['user_id']]) ?>#tab-recetas"
+          class="cl-btn cl-btn--outline">
+          Sus recetas
+        </a>
         </div>
 
     </div><!-- /.cl-card-body -->
