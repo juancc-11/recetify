@@ -315,7 +315,7 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
             <i class="fa-solid fa-trophy"></i> Ranking de recetas
         </a>
         <a href="<?= Yii::$app->urlManager->createUrl(['chef-lideres/index']) ?>" class="rl-sidebar-item">
-            <i class="fa-solid fa-hat-chef"></i> Chefs líderes
+            <i class="fa-solid fa-person"></i> Chefs líderes
         </a>
     </div>
 

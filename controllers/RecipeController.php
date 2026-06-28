@@ -7,7 +7,7 @@ use yii\web\Controller;
 use yii\web\Response;
 use yii\db\Query;
 use yii\db\Expression;
-
+ 
 class RecipeController extends Controller
 {
     // =========================================================
@@ -57,14 +57,16 @@ class RecipeController extends Controller
         'users.avatar_url',
     ]);
 
-        // BUSCADOR
+        // BUSCADOR (texto + tags)
         if (!empty($q)) {
             $queryBuilder->andWhere([
-                'or',
-                ['like', 'recipes.titulo',       $q],
-                ['like', 'recipes.descripcion',  $q],
-                ['like', 'recipes.receta_texto',  $q],
-            ]);
+                    'or',
+                    ['like', 'recipes.titulo',      $q],
+                    ['like', 'recipes.descripcion', $q],
+                    ['like', 'recipes.receta_texto', $q],
+                    ['like', 'tags.name',           $q],   // ← busca por nombre de tag
+                    ['like', 'tags.slug',           $q],   // ← busca por slug de tag
+                ]);
         }
 
         // FILTROS

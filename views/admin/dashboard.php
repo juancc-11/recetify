@@ -1,4 +1,3 @@
-
 <?php
 $this->title = 'Admin Panel';
 $this->registerCssFile('@web/css/admin-dashboard.css');
@@ -12,10 +11,47 @@ use yii\helpers\Url;
 use yii\helpers\Html;
 
 $tab = Yii::$app->request->get('tab', 'users');
+
+// ── Leer flashes y pasarlos a JS ──────────────────────────
+$flash      = null;
+$flashType  = 'success';
+$flashTitle = '¡Acción completada!';
+
+if (Yii::$app->session->hasFlash('success')) {
+    $flash      = Yii::$app->session->getFlash('success');
+    $flashType  = 'success';
+    $flashTitle = '¡Acción completada!';
+} elseif (Yii::$app->session->hasFlash('info')) {
+    $flash      = Yii::$app->session->getFlash('info');
+    $flashType  = 'info';
+    $flashTitle = 'Información';
+} elseif (Yii::$app->session->hasFlash('warning')) {
+    $flash      = Yii::$app->session->getFlash('warning');
+    $flashType  = 'warning';
+    $flashTitle = 'Atención';
+} elseif (Yii::$app->session->hasFlash('error')) {
+    $flash      = Yii::$app->session->getFlash('error');
+    $flashType  = 'error';
+    $flashTitle = 'Error';
+}
 ?>
+
 <script>
     const TOGGLE_BAN_URL = "<?= Url::to(['admin/toggle-ban']) ?>";
-    const SEARCH_URL = "<?= Url::to(['admin/search-ajax']) ?>";
+    const SEARCH_URL     = "<?= Url::to(['admin/search-ajax']) ?>";
+
+    <?php if ($flash !== null): ?>
+    document.addEventListener("DOMContentLoaded", function () {
+        Swal.fire({
+            title: <?= json_encode($flashTitle) ?>,
+            text:  <?= json_encode($flash) ?>,
+            icon:  <?= json_encode($flashType) ?>,
+            timer: 2200,
+            timerProgressBar: true,
+            showConfirmButton: false
+        });
+    });
+    <?php endif; ?>
 </script>
 
 <link rel="stylesheet" href="<?= Yii::getAlias('@web/css/index.css') ?>">
@@ -51,22 +87,24 @@ $tab = Yii::$app->request->get('tab', 'users');
                 <option value="recent">Más recientes</option>
                 <option value="old">Más antiguos</option>
             </select>
-            
+
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Buscar..." class="search-box-input">
                 <button type="button" class="btn-search">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
             </div>
-            
+
         </div>
 
-        <!-- USUARIOS -->
+        <!-- ══════════════════════════════════════════════
+             USUARIOS REPORTADOS
+             ══════════════════════════════════════════════ -->
         <?php if ($tab === 'users'): ?>
 
             <?php if (empty($userReports)): ?>
                 <div class="empty-state">
-                  <p>Actualmente no hay usuarios reportados</p>
+                    <p>Actualmente no hay usuarios reportados</p>
                 </div>
 
             <?php else: ?>
@@ -75,23 +113,20 @@ $tab = Yii::$app->request->get('tab', 'users');
                     <?php if ($report->user): ?>
                         <div class="card">
 
-                            
-                                <div class="close">
-                                    <form method="post" action="<?= Url::to(['admin/dismiss-report']) ?>">
-                                        <input type="hidden"
-                                        
-                                        name="<?= Yii::$app->request->csrfParam ?>"
-                                        value="<?= Yii::$app->request->getCsrfToken() ?>">
-                                        
-                                        <input type="hidden" name="report_id" value="<?= $report->id ?>">
-                                        <button type="submit" class="close btn-confirm" 
-                                            data-mensaje="¿Seguro que deseas descartar a este usuario?"
-                                            data-tipo="error">
-                                            ✖
-                                        </button>
-                                    </form>
-                                </div>
-                            
+                            <div class="close">
+                                <form method="post" action="<?= Url::to(['admin/dismiss-report']) ?>">
+                                    <input type="hidden"
+                                           name="<?= Yii::$app->request->csrfParam ?>"
+                                           value="<?= Yii::$app->request->getCsrfToken() ?>">
+                                    <input type="hidden" name="report_id" value="<?= $report->id ?>">
+                                    <input type="hidden" name="current_tab" value="users">
+                                    <button type="submit" class="close btn-confirm"
+                                        data-mensaje="¿Seguro que deseas descartar este reporte?"
+                                        data-tipo="warning">
+                                        ✖
+                                    </button>
+                                </form>
+                            </div>
 
                             <div class="user">
                                 <div class="avatar"
@@ -100,168 +135,155 @@ $tab = Yii::$app->request->get('tab', 'users');
                                 <span><?= Html::encode($report->user->username) ?></span>
                             </div>
 
-                            <p class="motivo">
-                                <?= Html::encode($report->motivo) ?>
-                            </p>
+                            <p class="motivo"><?= Html::encode($report->motivo) ?></p>
 
-                            <p class="descripcion">
-                                <?= Html::encode($report->descripcion) ?>
-                            </p>
+                            <p class="descripcion"><?= Html::encode($report->descripcion) ?></p>
 
                             <div class="actions">
                                 <form method="post" action="<?= Url::to(['admin/kick']) ?>">
                                     <?= Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->getCsrfToken()) ?>
                                     <input type="hidden" name="id" value="<?= $report->user->id ?>">
-                                    
-                                    <button type="button" class="kick btn-confirm" 
+                                    <input type="hidden" name="current_tab" value="users">
+                                    <button type="button" class="kick btn-confirm"
                                         data-mensaje="¿Seguro que deseas expulsar a este usuario?"
                                         data-tipo="warning">
                                         Kick
                                     </button>
                                 </form>
-                                
+
                                 <form method="post" action="<?= Url::to(['admin/ban']) ?>">
                                     <?= Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->getCsrfToken()) ?>
                                     <input type="hidden" name="id" value="<?= $report->user->id ?>">
-
-                                    <button type="button" class="ban btn-confirm" 
-                                        data-mensaje="¿Seguro que deseas banea a este usuario?"
+                                    <input type="hidden" name="current_tab" value="users">
+                                    <button type="button" class="ban btn-confirm"
+                                        data-mensaje="¿Seguro que deseas banear a este usuario?"
                                         data-tipo="error">
                                         Ban
                                     </button>
                                 </form>
                             </div>
+
                         </div>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
+
         <?php endif; ?>
 
 
-        <!-- RECETAS -->
+        <!-- ══════════════════════════════════════════════
+             RECETAS REPORTADAS
+             ══════════════════════════════════════════════ -->
         <?php if ($tab === 'recipes'): ?>
 
             <?php if (empty($recipeReports)): ?>
                 <div class="empty-state">
-                   <p>Actualmente no hay recetas reportadas</p>
+                    <p>Actualmente no hay recetas reportadas</p>
                 </div>
 
             <?php else: ?>
             <div class="grid">
                 <?php foreach ($recipeReports as $report): ?>
                     <?php if ($report->recipe): ?>
-<div class="card">
+                        <div class="card">
 
-    <!-- Botón descartar -->
-    <div class="close">
-        <form method="post" action="<?= Url::to(['admin/dismiss-report']) ?>">
+                            <!-- Botón descartar -->
+                            <div class="close">
+                                <form method="post" action="<?= Url::to(['admin/dismiss-report']) ?>">
+                                    <input type="hidden"
+                                           name="<?= Yii::$app->request->csrfParam ?>"
+                                           value="<?= Yii::$app->request->getCsrfToken() ?>">
+                                    <input type="hidden" name="report_id" value="<?= $report->id ?>">
+                                    <input type="hidden" name="current_tab" value="recipes">
+                                    <button type="submit" class="close btn-confirm"
+                                        data-mensaje="¿Seguro que deseas descartar este reporte?"
+                                        data-tipo="warning">
+                                        ✖
+                                    </button>
+                                </form>
+                            </div>
 
-            <input type="hidden"
-                name="<?= Yii::$app->request->csrfParam ?>"
-                value="<?= Yii::$app->request->getCsrfToken() ?>">
+                            <div class="image"
+                                 style="background-image:url('<?= $report->recipe->imagen_portada_url ?: '/images/default_recipe.png' ?>')">
+                            </div>
 
-            <input type="hidden"
-                name="report_id"
-                value="<?= $report->id ?>">
+                            <div class="info">
+                                <h4><?= Html::encode($report->recipe->titulo) ?></h4>
+                            </div>
 
-            <button
-                type="submit"
-                class="close btn-confirm"
-                data-mensaje="¿Seguro que deseas descartar este reporte?"
-                data-tipo="warning">
-                ✖
-            </button>
+                            <p class="descripcion"><?= Html::encode($report->descripcion) ?></p>
 
-        </form>
-    </div>
+                            <div class="actions">
 
-    <div class="image"
-        style="background-image:url('<?= $report->recipe->imagen_portada_url ?: '/images/default_recipe.png' ?>')">
-    </div>
+                                <a href="<?= Url::to(['recipe/view', 'id' => $report->recipe->id]) ?>"
+                                   class="leer">
+                                    Leer
+                                </a>
 
-    <div class="info">
-        <h4><?= Html::encode($report->recipe->titulo) ?></h4>
-    </div>
+                                <form method="post" action="<?= Url::to(['admin/delete-recipe']) ?>">
+                                    <?= Html::hiddenInput(
+                                        Yii::$app->request->csrfParam,
+                                        Yii::$app->request->getCsrfToken()
+                                    ) ?>
+                                    <input type="hidden" name="id" value="<?= $report->recipe->id ?>">
+                                    <input type="hidden" name="current_tab" value="recipes">
+                                    <button type="button" class="estado btn-confirm"
+                                        data-mensaje="¿Seguro que deseas eliminar esta receta?"
+                                        data-tipo="error">
+                                        Eliminar
+                                    </button>
+                                </form>
 
-    <p class="descripcion">
-        <?= Html::encode($report->descripcion) ?>
-    </p>
+                            </div>
 
-    <div class="actions">
-
-        <a href="<?= Url::to(['recipe/view', 'id' => $report->recipe->id]) ?>"
-           class="leer">
-            Leer
-        </a>
-
-        <form method="post" action="<?= Url::to(['admin/delete-recipe']) ?>">
-
-            <?= Html::hiddenInput(
-                Yii::$app->request->csrfParam,
-                Yii::$app->request->getCsrfToken()
-            ) ?>
-
-            <input type="hidden"
-                name="id"
-                value="<?= $report->recipe->id ?>">
-
-            <button
-                type="button"
-                class="estado btn-confirm"
-                data-mensaje="¿Seguro que deseas eliminar esta receta?"
-                data-tipo="error">
-                Eliminar
-            </button>
-
-        </form>
-
-    </div>
-
-</div>
+                        </div>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
+
         <?php endif; ?>
 
-        <!-- USUARIO BANEADO -->
+
+        <!-- ══════════════════════════════════════════════
+             USUARIOS BANEADOS
+             ══════════════════════════════════════════════ -->
         <?php if ($tab === 'banned'): ?>
 
             <?php if (empty($bannedUsers)): ?>
                 <div class="empty-state">
                     <p>Actualmente no hay usuarios baneados</p>
                 </div>
-                
+
             <?php else: ?>
             <div class="grid">
                 <?php foreach ($bannedUsers as $user): ?>
                     <div class="card">
 
-                    <div class="user">
-                        <div class="avatar"
-                            style="background-image: url('<?= $user->avatar_url ?>')">
+                        <div class="user">
+                            <div class="avatar"
+                                 style="background-image: url('<?= $user->avatar_url ?>')">
+                            </div>
+                            <span><?= Html::encode($user->username) ?></span>
                         </div>
 
-                        <span>
-                            <?= Html::encode($user->username) ?>
+                        <button class="btn-ban-toggle"
+                                data-id="<?= $user->id ?>"
+                                data-action="unban">
+                            Desbanear
+                        </button>
+
+                        <span class="badge <?= $user->is_active ? 'active' : 'ban' ?>">
+                            <?= $user->is_active ? 'ACTIVO' : 'BANEADO' ?>
                         </span>
+
                     </div>
-
-                    <button class="btn-ban-toggle"
-                         data-id="<?= $user->id ?>"
-                         data-action="unban">Desbanear
-                    </button>
-
-                    <span class="badge <?= $user->is_active ? 'active' : 'ban' ?>">
-                        <?= $user->is_active ? 'ACTIVO' : 'BANEADO' ?>
-                    </span>
-
-                </div>
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
-        <?php endif; ?>
-    </div>
 
+        <?php endif; ?>
+
+    </div>
 </div>
