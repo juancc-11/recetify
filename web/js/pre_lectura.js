@@ -21,6 +21,45 @@ $(function () {
         $('#tab-' + tab).addClass('active');
     });
 
+    /* ── Toast ── */
+    var toastEl    = document.getElementById('search-toast');
+    var toastTimer = null;
+
+    /* Crear el toast si no existe en el DOM */
+    if (!toastEl) {
+        toastEl = document.createElement('div');
+        toastEl.id = 'search-toast';
+        toastEl.style.cssText = [
+            'position:fixed',
+            'bottom:24px',
+            'left:50%',
+            'transform:translateX(-50%) translateY(10px)',
+            'background:#2a2a2a',
+            'color:#fff',
+            'padding:9px 20px',
+            'border-radius:24px',
+            'font-size:13px',
+            'font-weight:500',
+            'opacity:0',
+            'pointer-events:none',
+            'transition:opacity .2s,transform .2s',
+            'z-index:999',
+            'white-space:nowrap',
+        ].join(';');
+        document.body.appendChild(toastEl);
+    }
+
+    function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.style.opacity = '1';
+        toastEl.style.transform = 'translateX(-50%) translateY(0)';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            toastEl.style.opacity = '0';
+            toastEl.style.transform = 'translateX(-50%) translateY(10px)';
+        }, 2200);
+    }
+
 
     /* ══════════════════════════════════════════════
        2. DROPDOWN AÑADIR (Guardar / Favorito)
@@ -61,7 +100,7 @@ $(function () {
     $addBtn.on('click', function (e) {
         e.stopPropagation();
         if (IS_GUEST) {
-            window.location.href = BASE_URL + '/index.php?r=site/login';
+            showToast('Debes iniciar sesión para utilizar esta función');
             return;
         }
         $dropdown.toggleClass('open');

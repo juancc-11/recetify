@@ -32,7 +32,7 @@ class SiteController extends Controller
                 'only' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                    'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
                    'borrar-receta', 'subir-imagen-temp', 'submit-review', 'toggle-collection',
-                    'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read', 'guardar-bio'],
+                    'subir-comment', 'reportar-receta', 'mark-read', 'mark-all-read', 'guardar-bio'],
                 'rules' => [
                     [
                         'actions' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
