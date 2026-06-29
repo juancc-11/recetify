@@ -207,15 +207,7 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
                 </a>
                 <a href="<?= Yii::$app->urlManager->createUrl(['site/terms']) ?>">
                 <i class="fa-solid fa-file-lines"></i> Términos de uso
-                </a>
-
-                <div class="rl-config-row">
-                    <span><i class="fa-solid fa-moon"></i> Tema oscuro</span>
-                    <label class="rl-switch-mini">
-                        <input type="checkbox" id="rl-dark-toggle">
-                        <span class="rl-switch-mini-slider"></span>
-                    </label>
-                </div>
+                </a>      
 
                 <div class="rl-config-divider"></div>
 

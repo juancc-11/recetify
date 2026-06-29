@@ -114,22 +114,26 @@ $half = ($avg - $full) >= 0.5;
             <?php endif; ?>
 
             <!-- Autor -->
-            <div class="pl-author">
-                <?php if ($author && $author->avatar_url): ?>
-                    <img src="<?= Html::encode($author->avatar_url) ?>"
-                         class="pl-author-avatar" alt="Avatar">
-                <?php else: ?>
-                    <div class="pl-author-avatar-default">
-                        <?= strtoupper(substr($author->username ?? 'U', 0, 1)) ?>
-                    </div>
-                <?php endif; ?>
-                <div class="pl-author-info">
-                    <span class="pl-author-name">
-                        <?= Html::encode($author->username ?? 'Autor') ?>
-                    </span>
-                    <span class="pl-author-role">Autor de receta</span>
-                </div>
+<div class="pl-author">
+    <a href="<?= Yii::$app->urlManager->createUrl(['site/mi-perfil', 'id' => $author->id]) ?>"
+       class="pl-author-link">
+        <?php if ($author && $author->avatar_url): ?>
+            <img src="<?= Html::encode($author->avatar_url) ?>"
+                 class="pl-author-avatar" alt="Avatar">
+        <?php else: ?>
+            <div class="pl-author-avatar-default">
+                <?= strtoupper(substr($author->username ?? 'U', 0, 1)) ?>
             </div>
+        <?php endif; ?>
+    </a>
+    <div class="pl-author-info">
+        <a href="<?= Yii::$app->urlManager->createUrl(['site/mi-perfil', 'id' => $author->id]) ?>"
+           class="pl-author-name-link">
+            <?= Html::encode($author->username ?? 'Autor') ?>
+        </a>
+        <span class="pl-author-role">Autor de receta</span>
+    </div>
+</div>
 
             <!-- Botones -->
             <div class="pl-actions">

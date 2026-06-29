@@ -652,6 +652,28 @@
     line-height: 1.6;
 }
 
+.pl-author-link {
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.pl-author-link:hover .pl-author-avatar,
+.pl-author-link:hover .pl-author-avatar-default {
+    opacity: 0.85;
+}
+
+.pl-author-name-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pl-dark);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+.pl-author-name-link:hover {
+    color: var(--pl-orange);
+}
+
 /* ══════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════ */

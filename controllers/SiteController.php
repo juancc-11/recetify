@@ -31,8 +31,8 @@ class SiteController extends Controller
                 'class' => AccessControl::class,
                 'only' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
                    'toggle-publish', 'get-recipe', 'actualizar-receta', 'recipe-stats',
-                   'borrar-receta', 'subir-imagen-temp', 'pre-lectura', 'submit-review', 'toggle-collection',
-                    'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read', 'mi-perfil', 'guardar-bio'],
+                   'borrar-receta', 'subir-imagen-temp', 'submit-review', 'toggle-collection',
+                    'subir-comment', 'lectura', 'reportar-receta', 'mark-read', 'mark-all-read', 'guardar-bio'],
                 'rules' => [
                     [
                         'actions' => ['logout', 'profile', 'delete-account', 'mis-recetas', 'crear-receta',
@@ -289,10 +289,9 @@ public function actionMarkAllRead()
 
     public function actionMiPerfil($id = null)
 {
-    // Si no hay id, mostrar el propio perfil
     if ($id === null) {
         if (Yii::$app->user->isGuest) {
-            return $this->redirect(['site/login']);
+            return $this->redirect(['site/login']); // sin id y sin sesión → login
         }
         $id = Yii::$app->user->id;
     }
