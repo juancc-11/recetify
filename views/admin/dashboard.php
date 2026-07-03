@@ -216,7 +216,7 @@ if (Yii::$app->session->hasFlash('success')) {
 
                             <div class="actions">
 
-                                <a href="<?= Url::to(['recipe/view', 'id' => $report->recipe->id]) ?>"
+                                <a href="<?= Url::to(['site/pre-lectura', 'id' => $report->recipe->id]) ?>"
                                    class="leer">
                                     Leer
                                 </a>

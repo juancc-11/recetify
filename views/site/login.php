@@ -1,4 +1,6 @@
 <?php
+/** @var yii\web\View $this */
+/** @var app\models\Usuario $model */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
