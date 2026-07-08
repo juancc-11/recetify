@@ -166,13 +166,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-   /* ══════════════════════════════════════════════
+  /* ══════════════════════════════════════════════
    IDIOMA — Google Translate
 ══════════════════════════════════════════════ */
 
 const LANG_KEY = "rl_lang";
 const DOMAIN = ".recetifylab.gzgroup.dev";
-const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+const isLocal =
+    location.hostname === "localhost" ||
+    location.hostname === "127.0.0.1";
 
 // Idioma guardado
 let currentLang = localStorage.getItem(LANG_KEY) || "es";
@@ -180,14 +182,11 @@ let currentLang = localStorage.getItem(LANG_KEY) || "es";
 updateLangButtons(currentLang);
 
 // Restaurar idioma guardado
-if (currentLang === "en") {
-    setCookie("/es/en");
-} else {
-    clearCookie();
-}
+applyLanguage(currentLang);
 
 // Eventos de botones
 document.querySelectorAll(".rl-lang-btn").forEach(btn => {
+
     btn.addEventListener("click", () => {
 
         const lang = btn.dataset.lang;
@@ -195,24 +194,35 @@ document.querySelectorAll(".rl-lang-btn").forEach(btn => {
         if (lang === currentLang) return;
 
         currentLang = lang;
+
         localStorage.setItem(LANG_KEY, lang);
 
         updateLangButtons(lang);
 
-        if (lang === "en") {
-            setCookie("/es/en");
-        } else {
-            clearCookie();
-        }
+        applyLanguage(lang);
 
         location.reload();
+
     });
+
 });
 
+function applyLanguage(lang) {
+
+    if (lang === "en") {
+        setCookie("/es/en");
+    } else {
+        setCookie("/es/es");
+    }
+
+}
+
 function updateLangButtons(lang) {
+
     document.querySelectorAll(".rl-lang-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.lang === lang);
     });
+
 }
 
 function setCookie(value) {
@@ -221,20 +231,6 @@ function setCookie(value) {
 
     if (!isLocal) {
         document.cookie = `googtrans=${value}; path=/; domain=${DOMAIN}`;
-    }
-
-}
-
-function clearCookie() {
-
-    const expires = "Thu, 01 Jan 1970 00:00:00 GMT";
-
-    document.cookie =
-        `googtrans=; expires=${expires}; path=/`;
-
-    if (!isLocal) {
-        document.cookie =
-            `googtrans=; expires=${expires}; path=/; domain=${DOMAIN}`;
     }
 
 }
