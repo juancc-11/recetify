@@ -114,6 +114,16 @@ class SiteController extends Controller
         ]);
     }
 
+    public function actionPrivacy()
+{
+    return $this->render('privacidad');
+}
+
+public function actionTerms()
+{
+    return $this->render('terminos');
+}
+
     public function actionAbout()
     {
         return $this->render('about');
