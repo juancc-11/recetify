@@ -314,12 +314,16 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
     <div class="rl-sidebar-divider"></div>
 
     <div class="rl-sidebar-section">
-        <p class="rl-sidebar-section-title">Idioma de lectura</p>
-        <select class="rl-sidebar-select">
-            <option value="es">Español</option>
-            <option value="en">English</option>
-        </select>
+    <p class="rl-sidebar-section-title">Idioma de lectura</p>
+    <div class="rl-lang-switch">
+        <button class="rl-lang-btn active" data-lang="es" title="Español">
+            <span class="rl-lang-flag">🇵🇦</span> Español
+        </button>
+        <button class="rl-lang-btn" data-lang="en" title="English">
+            <span class="rl-lang-flag">🇺🇸</span> English
+        </button>
     </div>
+</div>
 
 </aside>
 
@@ -339,6 +343,21 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
 </footer>
 
 <?php $this->endBody() ?>
+<!-- Google Translate widget (oculto, lo controlamos nosotros) -->
+<div id="google_translate_element" style="display:none"></div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'es',
+        includedLanguages: 'en,es',
+        autoDisplay: false,
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+    }, 'google_translate_element');
+}
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script> 
+
 </body>
 </html>
 <?php $this->endPage() ?>

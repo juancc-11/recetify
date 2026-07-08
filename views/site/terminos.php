@@ -12,7 +12,7 @@ $fecha = '7 de julio de 2025';
 <div class="legal-wrapper">
 
     <div class="legal-hero">
-        <span class="legal-icon">📋</span>
+        <span class="legal-icon"></span>
         <h1>Términos de Uso</h1>
         <p class="legal-subtitle">Última actualización: <?= $fecha ?></p>
     </div>

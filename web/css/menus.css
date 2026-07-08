@@ -778,3 +778,57 @@ body.rl-body {
     .rl-sidebar { width: 240px; }
     .rl-sidebar-item { padding: 10px 12px; font-size: 14px; }
 }
+
+/* ── Selector de idioma ── */
+.rl-lang-switch {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.rl-lang-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 1.5px solid #dee2e6;
+    border-radius: 8px;
+    background: transparent;
+    color: #666;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.rl-lang-btn:hover {
+    border-color: #F26522;
+    color: #F26522;
+    background: #fff3ec;
+}
+
+.rl-lang-btn.active {
+    background: #F26522;
+    border-color: #F26522;
+    color: #fff;
+}
+
+.rl-lang-flag { font-size: 1rem; }
+
+/* Ocultar barra de Google Translate que aparece arriba */
+.goog-te-banner-frame,
+.skiptranslate {
+    display: none !important;
+}
+
+body {
+    top: 0 !important;
+}
+
+/* Ocultar el "Powered by Google" del widget */
+.goog-logo-link,
+.goog-te-gadget span {
+    display: none !important;
+}
