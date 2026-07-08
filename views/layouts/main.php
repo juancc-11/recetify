@@ -317,10 +317,10 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
     <p class="rl-sidebar-section-title">Idioma de lectura</p>
     <div class="rl-lang-switch">
         <button class="rl-lang-btn active" data-lang="es" title="Español">
-            <span class="rl-lang-flag">🇵🇦</span> Español
+            <span class="rl-lang-flag">EU</span> Español
         </button>
         <button class="rl-lang-btn" data-lang="en" title="English">
-            <span class="rl-lang-flag">🇺🇸</span> English
+            <span class="rl-lang-flag">US</span> English
         </button>
     </div>
 </div>
@@ -346,7 +346,9 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
 <!-- Google Translate widget (oculto, lo controlamos nosotros) -->
 <div id="google_translate_element" style="display:none"></div>
 
-<script type="text/javascript">
+<script>
+window.googleTranslateReady = false;
+
 function googleTranslateElementInit() {
     new google.translate.TranslateElement({
         pageLanguage: 'es',
@@ -354,10 +356,12 @@ function googleTranslateElementInit() {
         autoDisplay: false,
         layout: google.translate.TranslateElement.InlineLayout.SIMPLE
     }, 'google_translate_element');
+
+    window.googleTranslateReady = true;
 }
 </script>
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script> 
 
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
 <?php $this->endPage() ?>
