@@ -166,73 +166,77 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-  /* ══════════════════════════════════════════════
-   IDIOMA — Google Translate
-══════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════
+       IDIOMA — Google Translate
+       Ambos cambios usan reload para consistencia:
+       - EN: escribe cookie googtrans y recarga (GT la lee al inicio)
+       - ES: borra cookie googtrans y recarga (contenido original)
+       Esto evita el problema de tener que recargar manualmente.
+    ══════════════════════════════════════════════ */
+    const LANG_KEY = 'rl_lang';
+    const DOMAIN   = '.recetifylab.gzgroup.dev';
+    const isLocal  = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
-const LANG_KEY = "rl_lang";
-const DOMAIN = ".recetifylab.gzgroup.dev";
-const isLocal =
-    location.hostname === "localhost" ||
-    location.hostname === "127.0.0.1";
+    // Leer preferencia y marcar botón activo
+    const savedLang = localStorage.getItem(LANG_KEY) || 'es';
+    updateLangButtons(savedLang);
 
-// Idioma guardado
-let currentLang = localStorage.getItem(LANG_KEY) || "es";
-
-updateLangButtons(currentLang);
-
-// Restaurar idioma guardado
-applyLanguage(currentLang);
-
-// Eventos de botones
-document.querySelectorAll(".rl-lang-btn").forEach(btn => {
-
-    btn.addEventListener("click", () => {
-
-        const lang = btn.dataset.lang;
-
-        if (lang === currentLang) return;
-
-        currentLang = lang;
-
-        localStorage.setItem(LANG_KEY, lang);
-
-        updateLangButtons(lang);
-
-        applyLanguage(lang);
-
+    // Si la página cargó con preferencia inglés pero sin cookie GT activa → poner cookie y recargar
+    // Esto resuelve el caso de "vengo de recargar en español y quiero volver a inglés"
+    if (savedLang === 'en' && !getGTCookie()) {
+        setGTCookie('en');
         location.reload();
-
-    });
-
-});
-
-function applyLanguage(lang) {
-
-    if (lang === "en") {
-        setCookie("/es/en");
-    } else {
-        setCookie("/es/es");
     }
 
-}
+    // Escuchar clics en los botones
+    document.querySelectorAll('.rl-lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang    = btn.dataset.lang;
+            const current = localStorage.getItem(LANG_KEY) || 'es';
 
-function updateLangButtons(lang) {
+            // No hacer nada si ya está en ese idioma
+            if (lang === current) return;
 
-    document.querySelectorAll(".rl-lang-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.lang === lang);
+            localStorage.setItem(LANG_KEY, lang);
+            updateLangButtons(lang);
+
+            if (lang === 'en') {
+                // Poner cookie y recargar → GT traduce al arrancar
+                setGTCookie('en');
+                location.reload();
+            } else {
+                // Borrar cookie y recargar → página vuelve al español original
+                deleteGTCookie();
+                location.reload();
+            }
+        });
     });
 
-}
-
-function setCookie(value) {
-
-    document.cookie = `googtrans=${value}; path=/`;
-
-    if (!isLocal) {
-        document.cookie = `googtrans=${value}; path=/; domain=${DOMAIN}`;
+    function updateLangButtons(lang) {
+        document.querySelectorAll('.rl-lang-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.lang === lang);
+        });
     }
 
-}
+    function getGTCookie() {
+        const match = document.cookie.match('(^|;) ?googtrans=([^;]*)(;|$)');
+        return match ? match[2] : null;
+    }
+
+    function setGTCookie(lang) {
+        const value = '/es/' + lang;
+        document.cookie = 'googtrans=' + value + '; path=/';
+        if (!isLocal) {
+            document.cookie = 'googtrans=' + value + '; path=/; domain=' + DOMAIN;
+        }
+    }
+
+    function deleteGTCookie() {
+        const expired = '; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
+        document.cookie = 'googtrans=' + expired;
+        if (!isLocal) {
+            document.cookie = 'googtrans=' + expired + '; domain=' + DOMAIN;
+        }
+    }
 
 }); // fin DOMContentLoaded
