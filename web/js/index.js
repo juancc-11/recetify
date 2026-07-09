@@ -168,25 +168,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ══════════════════════════════════════════════
        IDIOMA — Google Translate
-       Ambos cambios usan reload para consistencia:
-       - EN: escribe cookie googtrans y recarga (GT la lee al inicio)
-       - ES: borra cookie googtrans y recarga (contenido original)
-       Esto evita el problema de tener que recargar manualmente.
+       En vez de pelear con la cookie googtrans, controlamos
+       directamente el <select> interno que Google inyecta
+       (.goog-te-combo). Es el mismo mecanismo que usa su propio
+       dropdown, así que "volver a español" restaura el contenido
+       original de forma confiable, sin necesidad de recargar.
     ══════════════════════════════════════════════ */
     const LANG_KEY = 'rl_lang';
-    const DOMAIN   = '.recetifylab.gzgroup.dev';
-    const isLocal  = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
-    // Leer preferencia y marcar botón activo
+    // Espera a que Google Translate termine de inyectar su <select>
+    // (tarda un poco tras cargar element.js) y luego ejecuta el callback.
+    function waitForGoogleCombo(callback, retries = 40) {
+        const select = document.querySelector('.goog-te-combo');
+        if (select) {
+            callback(select);
+        } else if (retries > 0) {
+            setTimeout(() => waitForGoogleCombo(callback, retries - 1), 250);
+        } else {
+            console.warn('Google Translate no se cargó a tiempo.');
+        }
+    }
+
+    function changeSiteLanguage(lang) {
+        waitForGoogleCombo((select) => {
+            // Si ya está en ese valor, disparar change no hace nada;
+            // forzamos con un valor distinto momentáneo si hiciera falta.
+            select.value = lang;
+            select.dispatchEvent(new Event('change'));
+        });
+    }
+
+    function updateLangButtons(lang) {
+        document.querySelectorAll('.rl-lang-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.lang === lang);
+        });
+    }
+
+    // Aplicar preferencia guardada al cargar la página
     const savedLang = localStorage.getItem(LANG_KEY) || 'es';
     updateLangButtons(savedLang);
-
-    // Si la página cargó con preferencia inglés pero sin cookie GT activa → poner cookie y recargar
-    // Esto resuelve el caso de "vengo de recargar en español y quiero volver a inglés"
-    if (savedLang === 'en' && !getGTCookie()) {
-        setGTCookie('en');
-        location.reload();
+    if (savedLang === 'en') {
+        changeSiteLanguage('en');
     }
+    // Si savedLang es 'es', no hacemos nada: la página ya carga en
+    // español por defecto (idioma original), sin pasar por Google.
 
     // Escuchar clics en los botones
     document.querySelectorAll('.rl-lang-btn').forEach(btn => {
@@ -194,21 +219,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const lang    = btn.dataset.lang;
             const current = localStorage.getItem(LANG_KEY) || 'es';
 
-            // No hacer nada si ya está en ese idioma
             if (lang === current) return;
 
             localStorage.setItem(LANG_KEY, lang);
             updateLangButtons(lang);
-
-            if (lang === 'en') {
-                // Poner cookie y recargar → GT traduce al arrancar
-                setGTCookie('en');
-                location.reload();
-            } else {
-                // Borrar cookie y recargar → página vuelve al español original
-                deleteGTCookie();
-                location.reload();
-            }
+            changeSiteLanguage(lang);
         });
     });
 
