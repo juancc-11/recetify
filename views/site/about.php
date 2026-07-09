@@ -150,7 +150,7 @@ $this->registerJsFile('@web/js/about.js', ['depends' => [\yii\web\JqueryAsset::c
                 <img src="<?= Yii::getAlias('@web/img/aboutUs/yari.jpeg') ?>">
 
                 <div class="member-info">
-                    <h3>Compañero 4</h3>
+                    <h3>Yarielsy Gónzales</h3>
                     <h4>Project Manager</h4>
 
                     <p>
