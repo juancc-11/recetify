@@ -190,25 +190,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Escuchar clics en los botones
     document.querySelectorAll('.rl-lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+        btn.addEventListener('click', () => {
+            const lang    = btn.dataset.lang;
+            const current = localStorage.getItem(LANG_KEY) || 'es';
 
-        const lang = btn.dataset.lang;
-        const current = localStorage.getItem(LANG_KEY) || 'es';
+            // No hacer nada si ya está en ese idioma
+            if (lang === current) return;
 
-        if (lang === current) return;
+            localStorage.setItem(LANG_KEY, lang);
+            updateLangButtons(lang);
 
-        localStorage.setItem(LANG_KEY, lang);
-        updateLangButtons(lang);
-
-        if (lang === 'en') {
-            setGTCookie('en');
-        } else {
-            setGTCookie('es');
-        }
-
-        location.reload();
+            if (lang === 'en') {
+                // Poner cookie y recargar → GT traduce al arrancar
+                setGTCookie('en');
+                location.reload();
+            } else {
+                // Borrar cookie y recargar → página vuelve al español original
+                deleteGTCookie();
+                location.reload();
+            }
+        });
     });
-});
 
     function updateLangButtons(lang) {
         document.querySelectorAll('.rl-lang-btn').forEach(b => {
@@ -222,42 +224,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setGTCookie(lang) {
-    const value = '/es/' + lang;
-
-    const cookies = [
-        `googtrans=${value}; path=/`,
-        `googtrans=${value}; path=/; domain=recetifylab.gzgroup.dev`,
-        `googtrans=${value}; path=/; domain=.recetifylab.gzgroup.dev`
-    ];
-
-    cookies.forEach(cookie => {
-        document.cookie = cookie;
-    });
-}
+        const value = '/es/' + lang;
+        document.cookie = 'googtrans=' + value + '; path=/';
+        if (!isLocal) {
+            document.cookie = 'googtrans=' + value + '; path=/; domain=' + DOMAIN;
+        }
+    }
 
     function deleteGTCookie() {
+        const expired = '; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
+        document.cookie = 'googtrans=' + expired;
+        if (!isLocal) {
+            document.cookie = 'googtrans=' + expired + '; domain=' + DOMAIN;
+        }
+    }
 
-    const domains = [
-        '',
-        location.hostname,
-        '.' + location.hostname,
-        '.recetifylab.gzgroup.dev',
-        'recetifylab.gzgroup.dev'
-    ];
-
-    domains.forEach(domain => {
-
-        const domainPart = domain ? '; domain=' + domain : '';
-
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/' + domainPart;
-
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax' + domainPart;
-
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; Secure' + domainPart;
-
-    });
-
-}
-
-}); // fin DOMContentLoaded DOMContentLoaded// fin DOMContentLoaded
+}); // 
     
