@@ -25,8 +25,14 @@ class User extends ActiveRecord implements IdentityInterface
         [['username', 'email'], 'required'],
         ['email', 'email'],
 
-        ['username', 'string', 'max' => 50],
+        ['username', 'string', 'min' => 3, 'max' => 50],
         ['email', 'string', 'max' => 255],
+
+        // Restringe el username a letras, números, _ y -
+        ['username', 'match',
+            'pattern' => '/^[a-zA-Z0-9_-]+$/',
+            'message' => 'El nombre de usuario solo puede contener letras, números, guiones (-) y guiones bajos (_).'
+        ],
 
         [['password', 'repeat_password'], 'required', 'on' => 'register'],
 
@@ -45,7 +51,6 @@ class User extends ActiveRecord implements IdentityInterface
         [['username', 'email'], 'unique'],
     ];
 }
-
     /* ================= IDENTITY ================= */
 
     public static function findIdentity($id)
