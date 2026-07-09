@@ -225,4 +225,4 @@ document.addEventListener("DOMContentLoaded", () => {
             updateLangButtons(lang);
             changeSiteLanguage(lang);
         });
-    });
+    
