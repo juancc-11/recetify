@@ -201,14 +201,12 @@ document.addEventListener("DOMContentLoaded", () => {
             updateLangButtons(lang);
 
             if (lang === 'en') {
-                // Poner cookie y recargar → GT traduce al arrancar
-                setGTCookie('en');
-                location.reload();
-            } else {
-                // Borrar cookie y recargar → página vuelve al español original
-                deleteGTCookie();
-                location.reload();
-            }
+    setGTCookie('en');
+} else {
+    setGTCookie('es');
+}
+
+location.reload();
         });
     });
 
@@ -224,20 +222,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setGTCookie(lang) {
-        const value = '/es/' + lang;
-        document.cookie = 'googtrans=' + value + '; path=/';
-        if (!isLocal) {
-            document.cookie = 'googtrans=' + value + '; path=/; domain=' + DOMAIN;
-        }
-    }
+
+    const value = '/es/' + lang;
+
+    const cookies = [
+        `googtrans=${value}; path=/`,
+        `googtrans=${value}; path=/; domain=recetifylab.gzgroup.dev`,
+        `googtrans=${value}; path=/; domain=.recetifylab.gzgroup.dev`,
+        `googtrans=${value}; path=/; domain=.gzgroup.dev`,
+        `googtrans=${value}; path=/; domain=gzgroup.dev`
+    ];
+
+    cookies.forEach(cookie => {
+        document.cookie = cookie;
+    });
+
+}
 
     function deleteGTCookie() {
-        const expired = '; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
-        document.cookie = 'googtrans=' + expired;
-        if (!isLocal) {
-            document.cookie = 'googtrans=' + expired + '; domain=' + DOMAIN;
-        }
-    }
+
+    const domains = [
+        '',
+        'recetifylab.gzgroup.dev',
+        '.recetifylab.gzgroup.dev',
+        'gzgroup.dev',
+        '.gzgroup.dev'
+    ];
+
+    domains.forEach(domain => {
+
+        const domainPart = domain ? '; domain=' + domain : '';
+
+        document.cookie =
+            'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/' +
+            domainPart;
+
+    });
+
+}
 
 }); // 
     
