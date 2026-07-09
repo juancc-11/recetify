@@ -303,7 +303,7 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
         <a href="<?= Yii::$app->urlManager->createUrl(['recipe/search']) ?>" class="rl-sidebar-item">
             <i class="fa-solid fa-magnifying-glass"></i> Buscar recetas
         </a>
-        <a href="#" class="rl-sidebar-item">
+        <a href="<?= Yii::$app->urlManager->createUrl(['recipe/ranking']) ?>" class="rl-sidebar-item">
             <i class="fa-solid fa-trophy"></i> Ranking de recetas
         </a>
         <a href="<?= Yii::$app->urlManager->createUrl(['chef-lideres/index']) ?>" class="rl-sidebar-item">
@@ -339,7 +339,54 @@ $this->registerLinkTag(['rel' => 'canonical', 'href' => $seoUrl]);
 </main>
 
 <footer class="rl-footer">
-    <p>Información futura...</p>
+    <div class="rl-footer-content">
+
+        <div class="rl-footer-brand">
+            <div class="rl-footer-logo">
+                <img src="<?= Yii::getAlias('@web/img/logos/logo_kiwi.png') ?>" alt="Recetify Lab">
+                <span>Recetify Lab</span>
+            </div>
+            <p class="rl-footer-tagline">
+                Descubre, crea y comparte recetas de cocina con una comunidad apasionada por la gastronomía.
+            </p>
+        </div>
+
+        <div class="rl-footer-col">
+            <h4>Explorar</h4>
+            <a href="<?= Yii::$app->urlManager->createUrl(['recipe/search']) ?>">Buscar recetas</a>
+            <a href="<?= Yii::$app->urlManager->createUrl(['recipe/ranking']) ?>">Ranking de recetas</a>
+            <a href="<?= Yii::$app->urlManager->createUrl(['chef-lideres/index']) ?>">Chefs líderes</a>
+        </div>
+
+        <div class="rl-footer-col">
+            <h4>Mi cuenta</h4>
+            <?php if (!Yii::$app->user->isGuest): ?>
+                <a href="<?= Yii::$app->urlManager->createUrl(['site/profile']) ?>">Perfil</a>
+                <a href="<?= Yii::$app->urlManager->createUrl(['site/mis-recetas']) ?>">Mis recetas</a>
+                <a href="<?= Yii::$app->urlManager->createUrl(['recipe/collections', 'tab' => 'guardado']) ?>">Guardados</a>
+            <?php else: ?>
+                <a href="<?= Yii::$app->urlManager->createUrl(['site/login']) ?>">Iniciar sesión</a>
+                <a href="<?= Yii::$app->urlManager->createUrl(['site/register']) ?>">Registrarse</a>
+            <?php endif; ?>
+        </div>
+
+        <div class="rl-footer-col">
+            <h4>Legal</h4>
+            <a href="<?= Yii::$app->urlManager->createUrl(['site/privacy']) ?>">Privacidad</a>
+            <a href="<?= Yii::$app->urlManager->createUrl(['site/terms']) ?>">Términos de uso</a>
+            <a href="<?= Yii::$app->urlManager->createUrl(['site/about']) ?>">Nosotros</a>
+        </div>
+
+    </div>
+
+    <div class="rl-footer-bottom">
+        <p>&copy; <?= date('Y') ?> Recetify Lab. Todos los derechos reservados.</p>
+        <div class="rl-footer-social">
+            <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+            <a href="#" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        </div>
+    </div>
 </footer>
 
 <?php $this->endBody() ?>
