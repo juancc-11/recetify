@@ -273,4 +273,45 @@ class RecipeController extends Controller
             return ['success' => false, 'message' => 'Error interno. Intenta de nuevo.'];
         }
     }
+
+        // =========================================================
+    // actionRanking — Top recetas mejor calificadas
+    // =========================================================
+
+    public function actionRanking()
+    {
+        $recetas = (new Query())
+            ->select([
+                'id'         => 'recipes.id',
+                'nombre'     => 'recipes.titulo',
+                'imagen'     => 'recipes.imagen_portada_url',
+                'autor'      => 'users.username',
+                'puntuacion' => new Expression('AVG(comments.score)'),
+                'votos'      => new Expression('COUNT(DISTINCT comments.id)'),
+            ])
+            ->from('recipes')
+            ->leftJoin('users',    'users.id = recipes.user_id')
+            ->leftJoin('comments', 'comments.recipe_id = recipes.id AND comments.is_visible = 1')
+            ->where([
+                'recipes.is_published' => 1,
+                'recipes.is_deleted'   => 0,
+            ])
+            ->groupBy([
+                'recipes.id',
+                'recipes.titulo',
+                'recipes.imagen_portada_url',
+                'users.username',
+            ])
+            ->having(['is not', new Expression('AVG(comments.score)'), null])
+            ->orderBy([
+                'puntuacion' => SORT_DESC,
+                'votos'      => SORT_DESC,
+            ])
+            ->limit(10)
+            ->all();
+
+        return $this->render('ranking', [
+            'recetas' => $recetas,
+        ]);
+    }
 }
