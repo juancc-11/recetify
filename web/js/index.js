@@ -168,10 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     /* ══════════════════════════════════════════════
        IDIOMA — Google Translate
-       Ambos cambios usan reload para consistencia:
        - EN: escribe cookie googtrans y recarga (GT la lee al inicio)
-       - ES: borra cookie googtrans y recarga (contenido original)
-       Esto evita el problema de tener que recargar manualmente.
+       - ES: hace un "break" total — borra TODAS las variantes de la
+             cookie googtrans (distintos dominios/paths) y limpia
+             cualquier rastro que Google Translate haya dejado en el
+             DOM, para volver al contenido original sin re-traducir.
     ══════════════════════════════════════════════ */
     const LANG_KEY = 'rl_lang';
     const DOMAIN   = '.recetifylab.gzgroup.dev';
@@ -182,7 +183,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateLangButtons(savedLang);
 
     // Si la página cargó con preferencia inglés pero sin cookie GT activa → poner cookie y recargar
-    // Esto resuelve el caso de "vengo de recargar en español y quiero volver a inglés"
     if (savedLang === 'en' && !getGTCookie()) {
         setGTCookie('en');
         location.reload();
@@ -205,8 +205,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 setGTCookie('en');
                 location.reload();
             } else {
-                // Borrar cookie y recargar → página vuelve al español original
+                // "Break" total: borrar cookies GT + limpiar DOM y recargar limpio
                 deleteGTCookie();
+                resetGTArtifacts();
                 location.reload();
             }
         });
@@ -232,11 +233,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function deleteGTCookie() {
-        const expired = '; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
-        document.cookie = 'googtrans=' + expired;
-        if (!isLocal) {
-            document.cookie = 'googtrans=' + expired + '; domain=' + DOMAIN;
-        }
+        const expired = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
+
+        // Borra sin domain (path raíz)
+        document.cookie = expired;
+
+        // Borra en variantes de dominio: con punto, sin punto y hostname actual
+        const domains = [DOMAIN, DOMAIN.replace(/^\./, ''), location.hostname];
+        domains.forEach(d => {
+            document.cookie = expired + ' domain=' + d + ';';
+        });
     }
 
-}); // fin DOMContentLoaded
+    function resetGTArtifacts() {
+        // Quita clases que Google Translate agrega al <html>
+        document.documentElement.classList.remove('translated-ltr', 'translated-rtl');
+
+        // GT a veces inyecta estilos inline (ej. margin-top para su barra superior)
+        document.documentElement.removeAttribute('style');
+        document.body.removeAttribute('style');
+    }
+
+}); // fin DOMContentLoaded// fin DOMContentLoaded
