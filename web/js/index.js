@@ -190,29 +190,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Escuchar clics en los botones
     document.querySelectorAll('.rl-lang-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const lang    = btn.dataset.lang;
-            const current = localStorage.getItem(LANG_KEY) || 'es';
+    btn.addEventListener('click', () => {
 
-            // No hacer nada si ya está en ese idioma
-            if (lang === current) return;
+        const lang = btn.dataset.lang;
+        const current = localStorage.getItem(LANG_KEY) || 'es';
 
-            localStorage.setItem(LANG_KEY, lang);
-            updateLangButtons(lang);
+        if (lang === current) return;
 
-            if (lang === 'en') {
-                // Poner cookie y recargar → GT traduce al arrancar
-                setGTCookie('en');
-                location.reload();
-            } else {
-                // Borrar cookie y recargar → página vuelve al español original
-                deleteGTCookie();
-                setTimeout(() => {
-                    location.reload(true);
-                }, 300);
-            }
-        });
+        localStorage.setItem(LANG_KEY, lang);
+        updateLangButtons(lang);
+
+        if (lang === 'en') {
+            setGTCookie('en');
+        } else {
+            setGTCookie('es');
+        }
+
+        location.reload();
     });
+});
 
     function updateLangButtons(lang) {
         document.querySelectorAll('.rl-lang-btn').forEach(b => {
@@ -226,12 +222,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setGTCookie(lang) {
-        const value = '/es/' + lang;
-        document.cookie = 'googtrans=' + value + '; path=/';
-        if (!isLocal) {
-            document.cookie = 'googtrans=' + value + '; path=/; domain=' + DOMAIN;
-        }
-    }
+    const value = '/es/' + lang;
+
+    const cookies = [
+        `googtrans=${value}; path=/`,
+        `googtrans=${value}; path=/; domain=recetifylab.gzgroup.dev`,
+        `googtrans=${value}; path=/; domain=.recetifylab.gzgroup.dev`
+    ];
+
+    cookies.forEach(cookie => {
+        document.cookie = cookie;
+    });
+}
 
     function deleteGTCookie() {
 
