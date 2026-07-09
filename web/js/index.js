@@ -207,7 +207,9 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 // Borrar cookie y recargar → página vuelve al español original
                 deleteGTCookie();
-                location.reload();
+                setTimeout(() => {
+                    location.reload(true);
+                }, 300);
             }
         });
     });
@@ -232,12 +234,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function deleteGTCookie() {
-        const expired = '; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
-        document.cookie = 'googtrans=' + expired;
-        if (!isLocal) {
-            document.cookie = 'googtrans=' + expired + '; domain=' + DOMAIN;
-        }
-    }
+
+    const domains = [
+        '',
+        location.hostname,
+        '.' + location.hostname,
+        '.recetifylab.gzgroup.dev',
+        'recetifylab.gzgroup.dev'
+    ];
+
+    domains.forEach(domain => {
+
+        const domainPart = domain ? '; domain=' + domain : '';
+
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/' + domainPart;
+
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax' + domainPart;
+
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; Secure' + domainPart;
+
+    });
+
+}
 
 }); // fin DOMContentLoaded DOMContentLoaded// fin DOMContentLoaded
     
